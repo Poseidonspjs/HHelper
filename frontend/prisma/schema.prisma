@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
@@ -10,378 +7,299 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [vector]
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions"), vector]
 }
 
-// ============ USER & AUTHENTICATION ============
-
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  name          String?
-  major         String?
-  graduationYear Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  profile       UserProfile?
-  plans         StudentPlan[]
-  enrollments   CourseEnrollment[]
+  id              String             @id @default(uuid())
+  email           String             @unique
+  name            String?
+  major           String?
+  graduationYear  Int?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  chatSessions    ChatSession[]
   clubMemberships ClubMembership[]
-  chatSessions  ChatSession[]
-  
+  enrollments     CourseEnrollment[]
+  plans           StudentPlan[]
+  profile         UserProfile?
+
   @@map("users")
 }
 
 model UserProfile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  bio             String?
-  interests       String[]
-  careerGoals     String?
-  skills          String[]
-  avatarUrl       String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  bio         String?
+  interests   String[]
+  careerGoals String?
+  skills      String[]
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_profiles")
 }
 
-// ============ COURSES & PREREQUISITES ============
-
 model Course {
-  id              String   @id @default(uuid())
-  courseCode      String   @unique // e.g., "CS 2100"
-  title           String
-  description     String?
-  credits         Int      @default(3)
-  department      String
-  level           Int      // 1000, 2000, 3000, 4000
-  
-  // Scheduling
-  semesters       String[] // ["Fall", "Spring", "Summer"]
-  
-  // Requirements
-  prerequisites   CoursePrerequisite[] @relation("CoursePrereqs")
-  corequisites    Course[] @relation("Corequisites")
-  corequisiteFor  Course[] @relation("Corequisites")
-  
-  // Relationships
-  enrollments     CourseEnrollment[]
-  planCourses     StudentPlanCourse[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id            String               @id @default(uuid())
+  courseCode    String               @unique
+  title         String
+  description   String?
+  credits       Int                  @default(3)
+  department    String
+  level         Int
+  semesters     String[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  enrollments   CourseEnrollment[]
+  prerequisites CoursePrerequisite[] @relation("CoursePrereqs")
+  planCourses   StudentPlanCourse[]
+  courses_A     Course[]             @relation("Corequisites")
+  courses_B     Course[]             @relation("Corequisites")
+
   @@index([department])
   @@index([level])
   @@map("courses")
 }
 
 model CoursePrerequisite {
-  id              String   @id @default(uuid())
-  courseId        String
-  course          Course   @relation("CoursePrereqs", fields: [courseId], references: [id], onDelete: Cascade)
-  
-  // Prerequisite logic
-  prerequisiteCode String  // The course code required (e.g., "CS 2100")
-  groupId         String?  // For OR logic: same groupId = any one required
-  minimumGrade    String?  // e.g., "C-", "B"
-  isConcurrent    Boolean  @default(false) // Can be taken at same time
-  
-  createdAt       DateTime @default(now())
-  
+  id               String   @id @default(uuid())
+  courseId         String
+  prerequisiteCode String
+  groupId          String?
+  minimumGrade     String?
+  isConcurrent     Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  course           Course   @relation("CoursePrereqs", fields: [courseId], references: [id], onDelete: Cascade)
+
   @@index([courseId])
   @@index([groupId])
   @@map("course_prerequisites")
 }
 
 model CourseEnrollment {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId        String
-  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  semester        String   // "Fall 2024"
-  year            Int
-  grade           String?  // "A", "B+", etc.
-  status          String   @default("enrolled") // enrolled, completed, dropped
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  semester  String
+  year      Int
+  grade     String?
+  status    String   @default("enrolled")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, courseId, semester, year])
   @@map("course_enrollments")
 }
 
-// ============ STUDENT PLANS ============
-
 model StudentPlan {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name            String   @default("My 4-Year Plan")
-  isActive        Boolean  @default(true)
-  startYear       Int      // e.g., 2024
-  
-  // Plan structure
-  courses         StudentPlanCourse[]
-  validations     PlanValidation[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String              @id @default(uuid())
+  userId      String
+  name        String              @default("My 4-Year Plan")
+  isActive    Boolean             @default(true)
+  startYear   Int
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  validations PlanValidation[]
+  courses     StudentPlanCourse[]
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@map("student_plans")
 }
 
 model StudentPlanCourse {
-  id              String   @id @default(uuid())
-  planId          String
-  plan            StudentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  courseId        String
-  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  // Placement in plan
-  year            Int      // 1, 2, 3, 4
-  semester        String   // "Fall", "Spring"
-  
-  // Status
-  isCompleted     Boolean  @default(false)
-  hasError        Boolean  @default(false)
-  errorMessage    String?
-  
-  createdAt       DateTime @default(now())
-  
+  id           String      @id @default(uuid())
+  planId       String
+  courseId     String
+  year         Int
+  semester     String
+  isCompleted  Boolean     @default(false)
+  hasError     Boolean     @default(false)
+  errorMessage String?
+  createdAt    DateTime    @default(now())
+  course       Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  plan         StudentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
   @@unique([planId, courseId])
   @@index([planId])
   @@map("student_plan_courses")
 }
 
 model PlanValidation {
-  id              String   @id @default(uuid())
-  planId          String
-  plan            StudentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  
-  isValid         Boolean
-  errors          Json     // Array of error objects
-  warnings        Json     // Array of warning objects
-  
-  validatedAt     DateTime @default(now())
-  
+  id          String      @id @default(uuid())
+  planId      String
+  isValid     Boolean
+  errors      Json
+  warnings    Json
+  validatedAt DateTime    @default(now())
+  plan        StudentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
   @@index([planId])
   @@map("plan_validations")
 }
 
-// ============ CLUBS & ORGANIZATIONS ============
-
 model Club {
-  id              String   @id @default(uuid())
-  name            String   @unique
+  id              String           @id @default(uuid())
+  name            String           @unique
   description     String?
-  category        String?  // Academic, Tech, Service, Arts, etc.
-  
-  // Contact & Links
+  category        String?
   email           String?
   website         String?
   instagramHandle String?
-  
-  // Metadata
-  tags            ClubTag[]
-  members         ClubMembership[]
-  
-  // Source tracking
-  source          String?  // "atuva", "hoosconnected", etc.
+  source          String?
   externalId      String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  members         ClubMembership[]
+  tags            ClubTag[]
+
   @@index([category])
   @@map("clubs")
 }
 
 model ClubTag {
-  id              String   @id @default(uuid())
-  clubId          String
-  club            Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  
-  tag             String
-  
+  id     String @id @default(uuid())
+  clubId String
+  tag    String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
   @@unique([clubId, tag])
   @@index([tag])
   @@map("club_tags")
 }
 
 model ClubMembership {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clubId          String
-  club            Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  
-  role            String?  // "member", "officer", "president"
-  joinedAt        DateTime @default(now())
-  
+  id       String   @id @default(uuid())
+  userId   String
+  clubId   String
+  role     String?
+  joinedAt DateTime @default(now())
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, clubId])
   @@map("club_memberships")
 }
 
-// ============ RAG & CHATBOT ============
-
 model RagDocument {
-  id              String   @id @default(uuid())
-  content         String
-  source          String   // URL or identifier
-  sourceType      String   // "course_catalog", "hgr_guide", "policy", etc.
-  title           String?
-  
-  // Vector embedding for semantic search
-  embedding       Unsupported("vector(1536)")?
-  
-  // Metadata
-  metadata        Json     @default("{}")
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id         String                 @id @default(uuid())
+  content    String
+  source     String
+  sourceType String
+  title      String?
+  embedding  Unsupported("vector")?
+  metadata   Json                   @default("{}")
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
   @@index([sourceType])
   @@map("rag_documents")
 }
 
 model ChatSession {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  title           String?  // Auto-generated from first message
-  
-  messages        ChatMessage[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id        String        @id @default(uuid())
+  userId    String
+  title     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@map("chat_sessions")
 }
 
 model ChatMessage {
-  id              String   @id @default(uuid())
-  sessionId       String
-  session         ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  role            String   // "user" or "assistant"
-  content         String
-  
-  // RAG context used (if applicable)
-  ragContext      Json?
-  
-  createdAt       DateTime @default(now())
-  
+  id         String      @id @default(uuid())
+  sessionId  String
+  role       String
+  content    String
+  ragContext Json?
+  createdAt  DateTime    @default(now())
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
   @@index([sessionId])
   @@map("chat_messages")
 }
 
-// ============ REQUIREMENTS & DEGREES ============
-
 model DegreeRequirement {
   id              String   @id @default(uuid())
   major           String
-  category        String   // "Core", "Elective", "General Education"
-  
-  requiredCourses String[] // Array of course codes
+  category        String
+  requiredCourses String[]
   minCredits      Int?
   description     String?
-  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@index([major])
   @@map("degree_requirements")
 }
 
-// ============ RESOURCES & OPPORTUNITIES ============
-
 model Resource {
-  id              String   @id @default(uuid())
-  title           String
-  description     String?
-  url             String?
-  category        String   // "Academic Support", "Career", "Wellness", etc.
-  
-  tags            String[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  url         String?
+  category    String
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   @@index([category])
   @@map("resources")
 }
 
 model ResearchOpportunity {
-  id              String   @id @default(uuid())
-  title           String
-  description     String
-  faculty         String?
-  department      String
-  
-  requirements    String?
-  isPaid          Boolean  @default(false)
-  credits         Int?
-  
-  applicationUrl  String?
-  deadline        DateTime?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id             String    @id @default(uuid())
+  title          String
+  description    String
+  faculty        String?
+  department     String
+  requirements   String?
+  isPaid         Boolean   @default(false)
+  credits        Int?
+  applicationUrl String?
+  deadline       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   @@index([department])
   @@map("research_opportunities")
 }
 
-// ============ EVENTS ============
-
 model Event {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   title           String
   description     String?
   location        String?
-  
   startTime       DateTime
   endTime         DateTime?
-  
-  organizer       String?  // Club or department
-  category        String?  // "Academic", "Social", "Career", etc.
-  
+  organizer       String?
+  category        String?
   registrationUrl String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
   @@index([startTime])
   @@index([category])
   @@map("events")
 }
 
-// ============ SYSTEM METADATA ============
-
 model ScraperRun {
-  id              String   @id @default(uuid())
-  scraperName     String
-  status          String   // "success", "failed", "partial"
-  
-  itemsScraped    Int      @default(0)
-  errors          Json?
-  
-  startedAt       DateTime @default(now())
-  completedAt     DateTime?
-  
+  id           String    @id @default(uuid())
+  scraperName  String
+  status       String
+  itemsScraped Int       @default(0)
+  errors       Json?
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+
   @@index([scraperName])
   @@map("scraper_runs")
 }
-

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { AlertCircle, CheckCircle, Search, Plus } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Course {
   courseCode: string;
@@ -30,6 +31,14 @@ interface ValidationError {
 }
 
 export default function PlanPage() {
+  return (
+    <ProtectedRoute pageName="the 4-year plan editor">
+      <PlanContent />
+    </ProtectedRoute>
+  );
+}
+
+function PlanContent() {
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [plan, setPlan] = useState<Record<string, PlanCourse[]>>({
