@@ -30,7 +30,8 @@ export default function ClubsPage() {
 
 function ClubsContent() {
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // What user is typing
+  const [searchQuery, setSearchQuery] = useState(""); // Actual search query sent to API
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -91,11 +92,23 @@ function ClubsContent() {
     }
   };
 
-  // Initial load and filter changes
+  // Initial load and filter changes (only triggers on searchQuery, not searchInput)
   useEffect(() => {
     setOffset(0);
     fetchClubs(false);
   }, [searchQuery, selectedCategory]);
+
+  // Handle search submit (Enter key or button click)
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   // Load more handler
   const handleLoadMore = () => {
@@ -131,14 +144,36 @@ function ClubsContent() {
         <CardContent className="pt-6">
           <div className="space-y-4">
             {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                placeholder="Search clubs by name, description, or tags..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 text-lg h-12"
-              />
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  placeholder="Search clubs by name, description, or tags... (press Enter)"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="pl-10 pr-10 text-lg h-12"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchQuery("");
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    type="button"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+              <Button 
+                onClick={handleSearch}
+                className="h-12 px-6"
+                type="button"
+              >
+                Search
+              </Button>
             </div>
 
             {/* Category Filters */}
