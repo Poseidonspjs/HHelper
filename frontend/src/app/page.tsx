@@ -161,6 +161,9 @@ interface FormData {
   entryYear: string;
   apCredits: string[];
   additionalDetails: string;
+  transcript?: File | null;
+  gpa?: string;
+  creditsCompleted?: string;
 }
 
 interface FormErrors {
@@ -169,6 +172,7 @@ interface FormErrors {
   focusArea?: string;
   entryYear?: string;
   apCredits?: string;
+  transcript?: string;
 }
 
 export default function Home() {
@@ -180,6 +184,9 @@ export default function Home() {
     entryYear: "",
     apCredits: [],
     additionalDetails: "",
+    transcript: null,
+    gpa: "",
+    creditsCompleted: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -392,20 +399,48 @@ export default function Home() {
     setIsLoading(true);
     setSubmitMessage(null);
 
-    // Store form data in localStorage for later use after authentication
-    localStorage.setItem('pendingUserData', JSON.stringify(formData));
+    // Handle transcript upload separately if it exists
+    if (formData.transcript) {
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.readAsDataURL(formData.transcript);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const dataToStore = {
+          ...formData,
+          transcript: null, // Remove file object
+          transcriptData: base64, // Store base64 instead
+        };
+        localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
 
-    setSubmitMessage({
-      type: 'success',
-      text: 'Redirecting to dashboard...'
-    });
+        setSubmitMessage({
+          type: 'success',
+          text: 'Redirecting to dashboard...'
+        });
 
-    // Redirect to dashboard where they'll be prompted to log in
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1000);
 
-    setIsLoading(false);
+        setIsLoading(false);
+      };
+    } else {
+      // Store form data in localStorage for later use after authentication
+      const dataToStore = { ...formData, transcript: null };
+      localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
+
+      setSubmitMessage({
+        type: 'success',
+        text: 'Redirecting to dashboard...'
+      });
+
+      // Redirect to dashboard where they'll be prompted to log in
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -476,6 +511,62 @@ export default function Home() {
             error={errors.apCredits}
           />
 
+
+          {/* Transcript Upload for Non-First Years */}
+          {formData.entryYear && parseInt(formData.entryYear) < new Date().getFullYear() && (
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-semibold text-gray-900">For Returning Students</h3>
+
+              <div className='text-gray-700'>
+                <label htmlFor="transcript" className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Transcript (Optional)
+                </label>
+                <input
+                  id="transcript"
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setFormData(prev => ({ ...prev, transcript: file }));
+                  }}
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Upload your unofficial transcript (PDF only)</p>
+              </div>
+
+              <div className='text-gray-700'>
+                <label htmlFor="gpa" className="block text-sm font-medium text-gray-700 mb-2">
+                  Current GPA (Optional)
+                </label>
+                <input
+                  id="gpa"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4.0"
+                  value={formData.gpa}
+                  onChange={(e) => setFormData(prev => ({ ...prev, gpa: e.target.value }))}
+                  placeholder="3.50"
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                />
+              </div>
+
+              <div className='text-gray-700'>
+                <label htmlFor="creditsCompleted" className="block text-sm font-medium text-gray-700 mb-2">
+                  Credits Completed (Optional)
+                </label>
+                <input
+                  id="creditsCompleted"
+                  type="number"
+                  min="0"
+                  value={formData.creditsCompleted}
+                  onChange={(e) => setFormData(prev => ({ ...prev, creditsCompleted: e.target.value }))}
+                  placeholder="30"
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Additional Details */}
           <div className='text-gray-700'>

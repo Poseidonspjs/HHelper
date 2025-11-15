@@ -65,15 +65,50 @@ export default function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProp
         const pendingData = localStorage.getItem('pendingUserData');
         if (pendingData) {
           try {
-            const formData = JSON.parse(pendingData);
-            // Save the pending user data to the database
+            const userData = JSON.parse(pendingData);
+
+            // Save basic user data first
             await fetch('/api/user/update', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify(formData)
+              body: JSON.stringify({
+                school: userData.school,
+                major: userData.major,
+                focusArea: userData.focusArea,
+                entryYear: userData.entryYear,
+                apCredits: userData.apCredits,
+                additionalDetails: userData.additionalDetails,
+              })
             });
+
+            // If there's transcript data, upload it separately
+            if (userData.transcriptData || (userData.gpa && userData.creditsCompleted)) {
+              const transcriptFormData = new FormData();
+
+              if (userData.transcriptData) {
+                // Convert base64 back to File
+                const response = await fetch(userData.transcriptData);
+                const blob = await response.blob();
+                const file = new File([blob], 'transcript.pdf', { type: 'application/pdf' });
+                transcriptFormData.append('transcript', file);
+              }
+
+              if (userData.gpa) {
+                transcriptFormData.append('gpa', userData.gpa);
+              }
+
+              if (userData.creditsCompleted) {
+                transcriptFormData.append('creditsCompleted', userData.creditsCompleted);
+              }
+
+              await fetch('/api/transcript/upload', {
+                method: 'POST',
+                body: transcriptFormData,
+              });
+            }
+
             // Clear the pending data
             localStorage.removeItem('pendingUserData');
           } catch (saveError) {
