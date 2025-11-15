@@ -5,15 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { AlertCircle, CheckCircle, Search, Plus } from "lucide-react";
+import { AlertCircle, CheckCircle, Search, Plus, Info } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Course {
   courseCode: string;
   title: string;
+  description?: string;
   credits: number;
+  department: string;
+  level: number;
   prerequisites: string[];
+  semesters?: string[];
 }
 
 interface PlanCourse {
@@ -53,13 +58,192 @@ function PlanContent() {
   });
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValidating, setIsValidating] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<{courseCode: string; reason: string}[]>([]);
+  const [suggestionsReasoning, setSuggestionsReasoning] = useState("");
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [coursesFetched, setCoursesFetched] = useState<Set<string>>(new Set());
 
-  // Fetch available courses
+  // Fetch AI suggestions on mount
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/courses`)
-      .then((res) => res.json())
-      .then((data) => setAvailableCourses(data.courses || []))
-      .catch((err) => console.error("Failed to fetch courses:", err));
+    const loadSuggestions = async () => {
+      setIsLoadingSuggestions(true);
+      try {
+        const userData = localStorage.getItem('pendingUserData');
+        let major = 'Computer Science';
+        let focusArea = 'General';
+        
+        if (userData) {
+          const parsed = JSON.parse(userData);
+          major = parsed.major || 'Computer Science';
+          focusArea = parsed.focusArea || 'General';
+        }
+        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/course-suggestions?major=${encodeURIComponent(major)}&focusArea=${encodeURIComponent(focusArea)}&year=1`
+        );
+        const data = await response.json();
+        
+        if (data.suggestions && Array.isArray(data.suggestions)) {
+          setAiSuggestions(data.suggestions);
+          setSuggestionsReasoning(data.reasoning || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch AI suggestions:", err);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    };
+    
+    loadSuggestions();
+  }, []);
+
+  // Fetch available courses only when searching
+  useEffect(() => {
+    // Only search if there's a query with at least 2 characters
+    if (searchQuery.length < 2) {
+      setAvailableCourses([]);
+      return;
+    }
+
+    // Debounce search
+    const timer = setTimeout(() => {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/courses?search=${encodeURIComponent(searchQuery)}&limit=50`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Search results:", data.courses?.length || 0, "courses for query:", searchQuery);
+          setAvailableCourses(data.courses || []);
+        })
+        .catch((err) => console.error("Failed to fetch courses:", err));
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load generated plan from localStorage (if available)
+  useEffect(() => {
+    const storedPlan = localStorage.getItem('generatedPlan');
+    if (storedPlan) {
+      try {
+        const generatedPlan = JSON.parse(storedPlan);
+        
+        // Convert the generated plan format to our plan format
+        const newPlan: Record<string, PlanCourse[]> = {
+          "1-Fall": [],
+          "1-Spring": [],
+          "2-Fall": [],
+          "2-Spring": [],
+          "3-Fall": [],
+          "3-Spring": [],
+          "4-Fall": [],
+          "4-Spring": [],
+        };
+
+        // Collect all unique course codes
+        const allCourseCodes = new Set<string>();
+
+        // Map year1, year2, year3, year4 to our format
+        const years = [
+          { key: 'year1', num: 1 },
+          { key: 'year2', num: 2 },
+          { key: 'year3', num: 3 },
+          { key: 'year4', num: 4 },
+        ];
+
+        years.forEach(({ key, num }) => {
+          const yearData = generatedPlan[key];
+          if (yearData) {
+            // Fall semester
+            if (yearData.fall && Array.isArray(yearData.fall)) {
+              newPlan[`${num}-Fall`] = yearData.fall.map((course: any) => {
+                allCourseCodes.add(course.courseCode);
+                return {
+                  courseCode: course.courseCode,
+                  year: num,
+                  semester: 'Fall',
+                };
+              });
+            }
+            // Spring semester
+            if (yearData.spring && Array.isArray(yearData.spring)) {
+              newPlan[`${num}-Spring`] = yearData.spring.map((course: any) => {
+                allCourseCodes.add(course.courseCode);
+                return {
+                  courseCode: course.courseCode,
+                  year: num,
+                  semester: 'Spring',
+                };
+              });
+            }
+          }
+        });
+
+        setPlan(newPlan);
+
+        // Fetch course details for all courses in the plan (batch request)
+        if (allCourseCodes.size > 0) {
+          const codes = Array.from(allCourseCodes);
+          console.log("Fetching details for", codes.length, "courses:", codes);
+          
+          // Mark all codes as being fetched
+          setCoursesFetched(new Set(codes));
+          
+          // Fetch all courses in one batch request
+          Promise.all(
+            codes.map(code => 
+              fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/courses?search=${encodeURIComponent(code)}&limit=5`)
+                .then(res => res.json())
+                .then(data => {
+                  // Find exact match (case-insensitive)
+                  if (data.courses && data.courses.length > 0) {
+                    const exactMatch = data.courses.find((c: Course) => 
+                      c.courseCode.toLowerCase().replace(/\s+/g, '') === code.toLowerCase().replace(/\s+/g, '')
+                    );
+                    if (exactMatch) {
+                      console.log(`✓ Found: ${code} -> ${exactMatch.courseCode}`);
+                      return exactMatch;
+                    }
+                    // If no exact match, try first result if it's close enough
+                    const firstCourse = data.courses[0];
+                    if (firstCourse.courseCode.toLowerCase().startsWith(code.toLowerCase().replace(/\s+/g, ''))) {
+                      console.log(`≈ Close match: ${code} -> ${firstCourse.courseCode}`);
+                      return firstCourse;
+                    }
+                  }
+                  console.warn(`✗ Not found: ${code}`);
+                  return null;
+                })
+                .catch(err => {
+                  console.error(`✗ Error fetching ${code}:`, err);
+                  return null;
+                })
+            )
+          ).then(fetchedCourses => {
+            const validCourses = fetchedCourses.filter(c => c !== null) as Course[];
+            console.log(`Successfully fetched ${validCourses.length}/${codes.length} course details`);
+            
+            setAvailableCourses(prev => {
+              // Merge with existing, avoiding duplicates
+              const combined = [...prev];
+              validCourses.forEach(course => {
+                if (!combined.some(c => c.courseCode === course.courseCode)) {
+                  combined.push(course);
+                }
+              });
+              return combined;
+            });
+          });
+        }
+        
+        // Clear the stored plan after loading (so it doesn't reload on every visit)
+        // Comment this out if you want to keep the plan persistent
+        // localStorage.removeItem('generatedPlan');
+        
+      } catch (error) {
+        console.error('Error loading generated plan:', error);
+      }
+    }
   }, []);
 
   // Handle drag and drop
@@ -153,12 +337,8 @@ function PlanContent() {
     }
   };
 
-  // Filter courses by search
-  const filteredCourses = availableCourses.filter(
-    (course) =>
-      course.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // No need for filtering - already filtered by API
+  const filteredCourses = availableCourses;
 
   // Calculate credits for a semester
   const getSemesterCredits = (semesterKey: string) => {
@@ -178,6 +358,15 @@ function PlanContent() {
         err.semester === semester &&
         err.severity === "error"
     );
+  };
+
+  // Show course details
+  const showCourseDetails = (courseCode: string) => {
+    const course = availableCourses.find((c) => c.courseCode === courseCode);
+    if (course) {
+      setSelectedCourse(course);
+      setShowCourseModal(true);
+    }
   };
 
   return (
@@ -248,32 +437,105 @@ function PlanContent() {
                     {...provided.droppableProps}
                     className="space-y-2 max-h-[600px] overflow-y-auto"
                   >
-                    {filteredCourses.map((course, index) => (
-                      <Draggable
-                        key={course.courseCode}
-                        draggableId={course.courseCode}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-3 border rounded-lg cursor-move hover:border-blue-500 transition-colors ${
-                              snapshot.isDragging ? "bg-blue-50 border-blue-500 shadow-lg" : "bg-white"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm">{course.courseCode}</p>
-                                <p className="text-xs text-gray-600 mt-1">{course.title}</p>
-                              </div>
-                              <Badge variant="secondary">{course.credits}</Badge>
-                            </div>
+                    {searchQuery.length < 2 ? (
+                      <div className="flex flex-col py-4">
+                        <div className="flex flex-col items-center justify-center py-6 text-gray-400 text-center border-b">
+                          <Search className="w-10 h-10 mb-2 opacity-50" />
+                          <p className="text-sm font-medium">Search for courses</p>
+                          <p className="text-xs mt-1">Type at least 2 characters to see results</p>
+                        </div>
+                        
+                        {/* AI Suggestions */}
+                        {isLoadingSuggestions ? (
+                          <div className="py-8 text-center">
+                            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                            <p className="text-sm text-gray-500">AI is generating course suggestions...</p>
                           </div>
-                        )}
-                      </Draggable>
-                    ))}
+                        ) : aiSuggestions.length > 0 ? (
+                          <div className="mt-4 space-y-3">
+                            <div className="px-2">
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-lg">✨</span>
+                                <h3 className="font-semibold text-sm">AI Recommended for You</h3>
+                              </div>
+                              {suggestionsReasoning && (
+                                <p className="text-xs text-gray-600 mb-3 italic">
+                                  {suggestionsReasoning}
+                                </p>
+                              )}
+                            </div>
+                            {aiSuggestions.map((suggestion, idx) => (
+                              <div
+                                key={idx}
+                                className="p-3 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:border-blue-400 transition-all cursor-pointer"
+                                onClick={() => {
+                                  setSearchQuery(suggestion.courseCode);
+                                }}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-semibold text-sm text-blue-900">
+                                      {suggestion.courseCode}
+                                    </p>
+                                    <p className="text-xs text-gray-700 mt-1">
+                                      {suggestion.reason}
+                                    </p>
+                                  </div>
+                                  <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800">
+                                    AI Pick
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : filteredCourses.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-gray-400 text-center">
+                        <Search className="w-12 h-12 mb-3 opacity-50" />
+                        <p className="text-sm font-medium">No courses found</p>
+                        <p className="text-xs mt-1">Try a different search term</p>
+                      </div>
+                    ) : (
+                      filteredCourses.map((course, index) => (
+                        <Draggable
+                          key={course.courseCode}
+                          draggableId={course.courseCode}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-3 border rounded-lg group relative ${
+                                snapshot.isDragging ? "bg-blue-50 border-blue-500 shadow-lg cursor-grabbing" : "bg-white cursor-grab hover:border-blue-500"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-semibold text-sm">{course.courseCode}</p>
+                                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">{course.title}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary">{course.credits}</Badge>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      showCourseDetails(course.courseCode);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-100 rounded"
+                                    title="View details"
+                                  >
+                                    <Info className="w-4 h-4 text-blue-600" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
                     {provided.placeholder}
                   </div>
                 )}
@@ -342,32 +604,61 @@ function PlanContent() {
                                               ref={provided.innerRef}
                                               {...provided.draggableProps}
                                               {...provided.dragHandleProps}
-                                              className={`p-3 rounded-lg cursor-move ${
+                                              className={`p-3 rounded-lg group relative ${
                                                 error
-                                                  ? "bg-red-100 border-2 border-red-500"
+                                                  ? "bg-red-100 border-2 border-red-500 cursor-move"
                                                   : snapshot.isDragging
-                                                  ? "bg-blue-50 border-2 border-blue-500 shadow-lg"
-                                                  : "bg-white border border-gray-200"
+                                                  ? "bg-blue-50 border-2 border-blue-500 shadow-lg cursor-grabbing"
+                                                  : "bg-white border border-gray-200 cursor-grab hover:border-blue-400"
                                               }`}
                                             >
                                               <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                  <p className="font-semibold text-sm">
+                                                <div 
+                                                  className="flex-1 cursor-pointer"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (courseData) {
+                                                      showCourseDetails(course.courseCode);
+                                                    }
+                                                  }}
+                                                >
+                                                  <p className="font-semibold text-sm flex items-center gap-2">
                                                     {course.courseCode}
+                                                    {courseData && (
+                                                      <Badge variant="outline" className="text-xs">
+                                                        {courseData.credits} cr
+                                                      </Badge>
+                                                    )}
                                                   </p>
-                                                  {courseData && (
-                                                    <p className="text-xs text-gray-600 mt-1">
+                                                  {courseData ? (
+                                                    <p className="text-xs text-gray-600 mt-1 line-clamp-1 hover:text-blue-600">
                                                       {courseData.title}
+                                                    </p>
+                                                  ) : coursesFetched.has(course.courseCode) ? (
+                                                    <p className="text-xs text-orange-600 mt-1 italic">
+                                                      Course not in catalog
+                                                    </p>
+                                                  ) : (
+                                                    <p className="text-xs text-gray-400 mt-1 italic">
+                                                      Loading...
                                                     </p>
                                                   )}
                                                 </div>
                                                 <button
-                                                  onClick={() => removeCourse(semesterKey, index)}
-                                                  className="text-red-500 hover:text-red-700 text-xs"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeCourse(semesterKey, index);
+                                                  }}
+                                                  className="text-red-500 hover:text-red-700 text-xs px-2 py-1 hover:bg-red-50 rounded transition-colors"
                                                 >
                                                   Remove
                                                 </button>
                                               </div>
+                                              {error && (
+                                                <p className="text-xs text-red-700 mt-2">
+                                                  ⚠ Prerequisite issue
+                                                </p>
+                                              )}
                                             </div>
                                           )}
                                         </Draggable>
@@ -389,6 +680,78 @@ function PlanContent() {
           </div>
         </div>
       </DragDropContext>
+
+      {/* Course Detail Modal */}
+      <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {selectedCourse && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center justify-between">
+                  <span>{selectedCourse.courseCode}: {selectedCourse.title}</span>
+                  <Badge variant="secondary" className="ml-2">
+                    {selectedCourse.credits} Credits
+                  </Badge>
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4 mt-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Course Information</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Department:</span>
+                      <p className="font-medium">{selectedCourse.department}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Level:</span>
+                      <p className="font-medium">{selectedCourse.level}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Credits:</span>
+                      <p className="font-medium">{selectedCourse.credits}</p>
+                    </div>
+                    {selectedCourse.semesters && selectedCourse.semesters.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Typically Offered:</span>
+                        <p className="font-medium">{selectedCourse.semesters.join(", ")}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {selectedCourse.description && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Description</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {selectedCourse.description}
+                    </p>
+                  </div>
+                )}
+
+                {selectedCourse.prerequisites && selectedCourse.prerequisites.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Prerequisites</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCourse.prerequisites.map((prereq, idx) => (
+                        <Badge key={idx} variant="outline">
+                          {prereq}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!selectedCourse.description && !selectedCourse.prerequisites?.length && (
+                  <div className="text-center py-4 text-gray-400">
+                    <p className="text-sm">No additional details available for this course.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

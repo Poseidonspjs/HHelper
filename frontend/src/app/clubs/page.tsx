@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Mail, Globe, Instagram, Users as UsersIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Search, Mail, Globe, Instagram, Users as UsersIcon, X } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Club {
@@ -29,55 +30,77 @@ export default function ClubsPage() {
 
 function ClubsContent() {
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [filteredClubs, setFilteredClubs] = useState<Club[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [showClubModal, setShowClubModal] = useState(false);
+  const [totalClubs, setTotalClubs] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
+  const CLUBS_PER_PAGE = 25;
 
   const categories = ["All", "Academic", "Tech", "Service", "Arts", "Business", "Recreation", "Social"];
 
-  // Fetch clubs
-  useEffect(() => {
-    const fetchClubs = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/clubs`
-        );
-        const data = await response.json();
-        setClubs(data.clubs || []);
-        setFilteredClubs(data.clubs || []);
-      } catch (err) {
-        console.error("Failed to fetch clubs:", err);
-      } finally {
-        setIsLoading(false);
+  // Fetch clubs with pagination
+  const fetchClubs = async (loadMore = false) => {
+    const currentOffset = loadMore ? offset : 0;
+    
+    if (loadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
+    
+    try {
+      const params = new URLSearchParams({
+        limit: CLUBS_PER_PAGE.toString(),
+        offset: currentOffset.toString(),
+      });
+      
+      if (searchQuery) {
+        params.append('search', searchQuery);
       }
-    };
-
-    fetchClubs();
-  }, []);
-
-  // Filter clubs
-  useEffect(() => {
-    let filtered = clubs;
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (club) =>
-          club.name.toLowerCase().includes(query) ||
-          club.description?.toLowerCase().includes(query) ||
-          club.tags?.some((tag) => tag.toLowerCase().includes(query))
+      
+      if (selectedCategory && selectedCategory !== "All") {
+        params.append('category', selectedCategory);
+      }
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/clubs?${params.toString()}`
       );
+      const data = await response.json();
+      
+      if (loadMore) {
+        setClubs(prev => [...prev, ...(data.clubs || [])]);
+      } else {
+        setClubs(data.clubs || []);
+      }
+      
+      setTotalClubs(data.total || 0);
+      setHasMore(data.hasMore || false);
+      setOffset(loadMore ? currentOffset + CLUBS_PER_PAGE : CLUBS_PER_PAGE);
+      
+    } catch (err) {
+      console.error("Failed to fetch clubs:", err);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
     }
+  };
 
-    // Filter by category
-    if (selectedCategory && selectedCategory !== "All") {
-      filtered = filtered.filter((club) => club.category === selectedCategory);
-    }
+  // Initial load and filter changes
+  useEffect(() => {
+    setOffset(0);
+    fetchClubs(false);
+  }, [searchQuery, selectedCategory]);
 
-    setFilteredClubs(filtered);
-  }, [searchQuery, selectedCategory, clubs]);
+  // Load more handler
+  const handleLoadMore = () => {
+    fetchClubs(true);
+  };
 
   if (isLoading) {
     return (
@@ -99,7 +122,7 @@ function ClubsContent() {
         </div>
         <h1 className="text-3xl font-bold text-gray-900">Discover Clubs</h1>
         <p className="text-gray-600 mt-2">
-          Explore 100+ student organizations at UVA
+          Explore {totalClubs || "1,000+"}  student organizations at UVA
         </p>
       </div>
 
@@ -138,12 +161,12 @@ function ClubsContent() {
       {/* Results Count */}
       <div className="flex items-center justify-between">
         <p className="text-gray-600">
-          Showing <span className="font-semibold">{filteredClubs.length}</span> clubs
+          Showing <span className="font-semibold">{clubs.length}</span> of <span className="font-semibold">{totalClubs}</span> clubs
         </p>
       </div>
 
       {/* Clubs Grid */}
-      {filteredClubs.length === 0 ? (
+      {clubs.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
             <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -154,8 +177,9 @@ function ClubsContent() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClubs.map((club, index) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {clubs.map((club, index) => (
             <Card key={club.id || index} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
@@ -213,14 +237,45 @@ function ClubsContent() {
                   )}
                 </div>
 
-                {/* Join Button */}
-                <Button className="w-full mt-4" variant="outline">
+                {/* Learn More Button */}
+                <Button 
+                  className="w-full mt-4" 
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedClub(club);
+                    setShowClubModal(true);
+                  }}
+                >
                   Learn More
                 </Button>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <Button 
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                size="lg"
+                className="px-8"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    Load More ({totalClubs - clubs.length} remaining)
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Stats Footer */}
@@ -228,12 +283,12 @@ function ClubsContent() {
         <CardContent className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <p className="text-4xl font-bold text-blue-600">{clubs.length}+</p>
+              <p className="text-4xl font-bold text-blue-600">{totalClubs || clubs.length}+</p>
               <p className="text-gray-600 mt-1">Student Organizations</p>
             </div>
             <div>
               <p className="text-4xl font-bold text-blue-600">
-                {new Set(clubs.map((c) => c.category)).size}
+                {new Set(clubs.map((c) => c.category)).size}+
               </p>
               <p className="text-gray-600 mt-1">Categories</p>
             </div>
@@ -244,6 +299,118 @@ function ClubsContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Club Details Modal */}
+      <Dialog open={showClubModal} onOpenChange={setShowClubModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {selectedClub && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{selectedClub.name}</DialogTitle>
+                {selectedClub.category && (
+                  <div className="flex gap-2 mt-2">
+                    <Badge className="text-sm">{selectedClub.category}</Badge>
+                  </div>
+                )}
+              </DialogHeader>
+
+              <div className="space-y-6 mt-4">
+                {/* Description */}
+                {selectedClub.description && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">About</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {selectedClub.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {selectedClub.tags && selectedClub.tags.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Categories & Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedClub.tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Information */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-3">Connect With Us</h4>
+                  <div className="space-y-3">
+                    {selectedClub.website && (
+                      <a
+                        href={selectedClub.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                      >
+                        <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900">Website</p>
+                          <p className="text-xs text-gray-500 truncate">{selectedClub.website}</p>
+                        </div>
+                      </a>
+                    )}
+
+                    {selectedClub.email && (
+                      <a
+                        href={`mailto:${selectedClub.email}`}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                      >
+                        <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200">
+                          <Mail className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900">Email</p>
+                          <p className="text-xs text-gray-500 truncate">{selectedClub.email}</p>
+                        </div>
+                      </a>
+                    )}
+
+                    {selectedClub.instagramHandle && (
+                      <a
+                        href={`https://instagram.com/${selectedClub.instagramHandle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                      >
+                        <div className="p-2 bg-pink-100 rounded-lg group-hover:bg-pink-200">
+                          <Instagram className="w-5 h-5 text-pink-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900">Instagram</p>
+                          <p className="text-xs text-gray-500">@{selectedClub.instagramHandle}</p>
+                        </div>
+                      </a>
+                    )}
+
+                    {!selectedClub.website && !selectedClub.email && !selectedClub.instagramHandle && (
+                      <div className="text-center py-4 text-gray-400">
+                        <p className="text-sm">No contact information available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-gray-500 text-center">
+                    Interested? Reach out through the contact methods above to learn more!
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -277,29 +277,185 @@ export default function Home() {
   ]
 
   const majors = [
-    'Computer Science',
-    'Business Administration',
-    'Psychology',
+    'Aerospace Engineering',
+    'African American and African Studies',
+    'American Sign Language',
+    'American Studies',
+    'Anthropology',
+    'Applied Mathematics',
+    'Archaeology',
+    'Architectural History',
+    'Architecture',
+    'Art History',
+    'Asian Pacific American Studies',
+    'Astronomy',
+    'Behavioral Neuroscience',
     'Biology',
-    'Engineering',
+    'Biomedical Engineering',
+    'Chemical Engineering',
+    'Chemistry',
+    'Chinese Language & Literature',
+    'Civil Engineering',
+    'Classics',
+    'Cognitive Science',
+    'Commerce',
+    'Computer Engineering',
+    'Computer Science',
+    'Dance',
+    'Data Analytics',
+    'Data Science',
+    'Drama',
+    'Early Childhood Education',
+    'East Asian Languages, Literatures and Culture',
     'Economics',
+    'Electrical Engineering',
+    'Elementary Education',
+    'Engineering Science',
     'English',
+    'Entrepreneurship',
+    'Environmental Sciences',
+    'Environmental Thought and Practice',
+    'French',
+    'German',
+    'Global Culture and Commerce',
+    'Global Studies',
+    'Global Environments and Sustainability',
+    'Health, Ethics, and Society',
+    'Health Sciences Management',
     'History',
+    'History of Art',
+    'History of Science and Technology',
+    'Human Biology',
+    'Interdisciplinary Studies',
+    'Italian',
+    'Japanese Language & Literature',
+    'Jewish Studies',
+    'Kinesiology',
+    'Korean',
+    'Latin American Studies',
+    'Leadership',
+    'Linguistics',
+    'Materials Science and Engineering',
     'Mathematics',
-    'Political Science'
+    'Mechanical Engineering',
+    'Media Studies',
+    'Medieval Studies',
+    'Middle Eastern and South Asian Languages and Cultures',
+    'Music',
+    'Neuroscience',
+    'Nursing',
+    'Philosophy',
+    'Physics',
+    'Political and Social Thought',
+    'Political Philosophy, Policy, and Law',
+    'Politics',
+    'Portuguese',
+    'Psychology',
+    'Public Policy and Leadership',
+    'Religious Studies',
+    'Slavic Languages and Literatures',
+    'Sociology',
+    'South Asian Languages and Literatures',
+    'Spanish',
+    'Special Education',
+    'Speech Communication Disorders',
+    'Statistics',
+    'Studio Art',
+    'Systems Engineering',
+    'Urban and Environmental Planning',
+    'Women, Gender & Sexuality',
+    'Youth & Social Innovation'
   ];
 
   const focusAreas: Record<string, string[]> = {
-    'Computer Science': ['Software Development', 'Data Science', 'Cybersecurity', 'AI/Machine Learning'],
-    'Business Administration': ['Finance', 'Marketing', 'Management', 'Entrepreneurship'],
-    'Psychology': ['Clinical Psychology', 'Cognitive Psychology', 'Social Psychology', 'Developmental Psychology'],
-    'Biology': ['Pre-Med', 'Research', 'Environmental Biology', 'Molecular Biology'],
-    'Engineering': ['Civil', 'Mechanical', 'Electrical', 'Computer Engineering'],
+    'Aerospace Engineering': ['Aerodynamics', 'Propulsion Systems', 'Space Systems', 'Flight Mechanics'],
+    'African American and African Studies': ['History & Culture', 'Social Justice', 'Literature', 'Politics'],
+    'American Sign Language': ['Interpretation', 'Deaf Culture', 'Language Structure', 'Education'],
+    'American Studies': ['Cultural Studies', 'History', 'Politics', 'Literature'],
+    'Anthropology': ['Cultural Anthropology', 'Archaeology', 'Biological Anthropology', 'Linguistic Anthropology'],
+    'Applied Mathematics': ['Computational Math', 'Optimization', 'Mathematical Modeling', 'Data Analysis'],
+    'Archaeology': ['Field Methods', 'Cultural Heritage', 'Material Culture', 'Bioarchaeology'],
+    'Architectural History': ['Historic Preservation', 'Theory & Criticism', 'Urban History', 'Architectural Conservation'],
+    'Architecture': ['Sustainable Design', 'Urban Design', 'Digital Fabrication', 'Historic Preservation'],
+    'Art History': ['Renaissance', 'Modern & Contemporary', 'Museum Studies', 'Global Art'],
+    'Asian Pacific American Studies': ['Migration & Diaspora', 'Cultural Identity', 'Social Justice', 'Literature'],
+    'Astronomy': ['Astrophysics', 'Planetary Science', 'Cosmology', 'Observational Astronomy'],
+    'Behavioral Neuroscience': ['Cognitive Neuroscience', 'Neuropsychology', 'Research Methods', 'Clinical Applications'],
+    'Biology': ['Pre-Med', 'Research', 'Environmental Biology', 'Molecular Biology', 'Ecology'],
+    'Biomedical Engineering': ['Medical Devices', 'Tissue Engineering', 'Biomechanics', 'Bioimaging'],
+    'Chemical Engineering': ['Process Engineering', 'Materials', 'Biotechnology', 'Energy'],
+    'Chemistry': ['Organic Chemistry', 'Physical Chemistry', 'Biochemistry', 'Analytical Chemistry'],
+    'Chinese Language & Literature': ['Language Acquisition', 'Chinese Literature', 'Translation', 'Cultural Studies'],
+    'Civil Engineering': ['Structural Engineering', 'Transportation', 'Environmental Engineering', 'Geotechnical'],
+    'Classics': ['Greek & Roman History', 'Classical Languages', 'Archaeology', 'Ancient Philosophy'],
+    'Cognitive Science': ['Neuroscience', 'AI & Machine Learning', 'Psychology', 'Linguistics'],
+    'Commerce': ['Finance', 'Marketing', 'Management', 'Accounting', 'Information Technology'],
+    'Computer Engineering': ['Embedded Systems', 'Computer Architecture', 'Networking', 'Robotics'],
+    'Computer Science': ['Software Development', 'Data Science', 'Cybersecurity', 'AI/Machine Learning', 'Systems'],
+    'Dance': ['Performance', 'Choreography', 'Dance History', 'Movement Studies'],
+    'Data Analytics': ['Business Intelligence', 'Statistical Analysis', 'Machine Learning', 'Visualization'],
+    'Data Science': ['Machine Learning', 'Statistical Modeling', 'Big Data', 'Data Visualization'],
+    'Drama': ['Acting', 'Directing', 'Playwriting', 'Technical Theater'],
+    'Early Childhood Education': ['Child Development', 'Curriculum Design', 'Special Needs', 'Family Engagement'],
+    'East Asian Languages, Literatures and Culture': ['Language Studies', 'Literature', 'Cultural Studies', 'Translation'],
     'Economics': ['Public Policy', 'Finance', 'International Economics', 'Behavioral Economics'],
+    'Electrical Engineering': ['Power Systems', 'Electronics', 'Control Systems', 'Signal Processing'],
+    'Elementary Education': ['Curriculum & Instruction', 'Child Development', 'Literacy', 'Classroom Management'],
+    'Engineering Science': ['Multidisciplinary Engineering', 'Research', 'Systems Analysis', 'Innovation'],
     'English': ['Literature', 'Creative Writing', 'Rhetoric', 'Linguistics'],
+    'Entrepreneurship': ['Startups', 'Innovation', 'Business Strategy', 'Social Entrepreneurship'],
+    'Environmental Sciences': ['Climate Change', 'Conservation', 'Ecology', 'Environmental Policy'],
+    'Environmental Thought and Practice': ['Sustainability', 'Environmental Justice', 'Policy', 'Community Engagement'],
+    'French': ['Language & Culture', 'Literature', 'Translation', 'Francophone Studies'],
+    'German': ['Language & Culture', 'Literature', 'Translation', 'German Studies'],
+    'Global Culture and Commerce': ['International Business', 'Cultural Studies', 'Global Economics', 'Cross-Cultural Management'],
+    'Global Studies': ['International Relations', 'Development', 'Cultural Studies', 'Global Politics'],
+    'Global Environments and Sustainability': ['Climate Policy', 'Conservation', 'Sustainable Development', 'Environmental Justice'],
+    'Health, Ethics, and Society': ['Bioethics', 'Health Policy', 'Medical Humanities', 'Social Medicine'],
+    'Health Sciences Management': ['Healthcare Administration', 'Health Policy', 'Clinical Management', 'Public Health'],
     'History': ['American History', 'European History', 'World History', 'Public History'],
+    'History of Art': ['Museum Studies', 'Art Theory', 'Conservation', 'Global Art History'],
+    'History of Science and Technology': ['History of Medicine', 'Technology Studies', 'Science & Society', 'Innovation History'],
+    'Human Biology': ['Pre-Med', 'Human Physiology', 'Genetics', 'Public Health'],
+    'Interdisciplinary Studies': ['Customized Concentration', 'Multiple Disciplines', 'Research Methods', 'Integrated Studies'],
+    'Italian': ['Language & Culture', 'Italian Literature', 'Translation', 'Italian Studies'],
+    'Japanese Language & Literature': ['Language Acquisition', 'Japanese Literature', 'Translation', 'Japanese Culture'],
+    'Jewish Studies': ['Jewish History', 'Hebrew', 'Jewish Philosophy', 'Israeli Studies'],
+    'Kinesiology': ['Exercise Science', 'Sports Medicine', 'Biomechanics', 'Coaching'],
+    'Korean': ['Language Acquisition', 'Korean Culture', 'Translation', 'Korean Studies'],
+    'Latin American Studies': ['History', 'Politics', 'Literature', 'Social Movements'],
+    'Leadership': ['Organizational Leadership', 'Social Innovation', 'Management', 'Public Policy'],
+    'Linguistics': ['Syntax', 'Semantics', 'Phonology', 'Sociolinguistics'],
+    'Materials Science and Engineering': ['Nanomaterials', 'Biomaterials', 'Electronic Materials', 'Structural Materials'],
     'Mathematics': ['Pure Mathematics', 'Applied Mathematics', 'Statistics', 'Actuarial Science'],
-    'Political Science': ['International Relations', 'Public Administration', 'Political Theory', 'Comparative Politics']
+    'Mechanical Engineering': ['Thermodynamics', 'Robotics', 'Manufacturing', 'Energy Systems'],
+    'Media Studies': ['Digital Media', 'Film & Television', 'Journalism', 'Social Media'],
+    'Medieval Studies': ['Medieval History', 'Literature', 'Art & Architecture', 'Philosophy'],
+    'Middle Eastern and South Asian Languages and Cultures': ['Language Studies', 'Cultural Studies', 'History', 'Literature'],
+    'Music': ['Performance', 'Composition', 'Music Theory', 'Music History'],
+    'Neuroscience': ['Cognitive Neuroscience', 'Molecular Neuroscience', 'Behavioral Neuroscience', 'Clinical Neuroscience'],
+    'Nursing': ['Clinical Practice', 'Community Health', 'Pediatric Nursing', 'Critical Care'],
+    'Philosophy': ['Ethics', 'Logic', 'Metaphysics', 'Political Philosophy'],
+    'Physics': ['Astrophysics', 'Quantum Mechanics', 'Condensed Matter', 'Particle Physics'],
+    'Political and Social Thought': ['Political Theory', 'Social Philosophy', 'Ethics', 'Critical Theory'],
+    'Political Philosophy, Policy, and Law': ['Legal Studies', 'Public Policy', 'Political Theory', 'Constitutional Law'],
+    'Politics': ['International Relations', 'Public Administration', 'Political Theory', 'Comparative Politics'],
+    'Portuguese': ['Language & Culture', 'Brazilian Studies', 'Translation', 'Lusophone Literature'],
+    'Psychology': ['Clinical Psychology', 'Cognitive Psychology', 'Social Psychology', 'Developmental Psychology'],
+    'Public Policy and Leadership': ['Policy Analysis', 'Leadership Development', 'Public Administration', 'Social Policy'],
+    'Religious Studies': ['Comparative Religion', 'Theology', 'Religion & Society', 'Sacred Texts'],
+    'Slavic Languages and Literatures': ['Russian Language', 'Eastern European Literature', 'Cultural Studies', 'Translation'],
+    'Sociology': ['Social Inequality', 'Urban Sociology', 'Cultural Sociology', 'Research Methods'],
+    'South Asian Languages and Literatures': ['Hindi/Urdu', 'South Asian Literature', 'Cultural Studies', 'Translation'],
+    'Spanish': ['Language & Culture', 'Spanish Literature', 'Translation', 'Hispanic Studies'],
+    'Special Education': ['Learning Disabilities', 'Behavioral Interventions', 'Inclusive Education', 'Assessment'],
+    'Speech Communication Disorders': ['Speech Pathology', 'Audiology', 'Language Development', 'Clinical Practice'],
+    'Statistics': ['Data Analysis', 'Statistical Modeling', 'Biostatistics', 'Applied Statistics'],
+    'Studio Art': ['Painting', 'Sculpture', 'Photography', 'Digital Art'],
+    'Systems Engineering': ['Systems Design', 'Operations Research', 'Project Management', 'Integration'],
+    'Urban and Environmental Planning': ['Urban Design', 'Environmental Planning', 'Transportation Planning', 'Community Development'],
+    'Women, Gender & Sexuality': ['Feminist Theory', 'Gender Studies', 'LGBTQ+ Studies', 'Intersectionality'],
+    'Youth & Social Innovation': ['Youth Development', 'Community Organizing', 'Social Entrepreneurship', 'Education']
   };
 
   const entryYears = ['2025', '2026', '2027', '2028'];
@@ -399,46 +555,69 @@ export default function Home() {
     setIsLoading(true);
     setSubmitMessage(null);
 
-    // Handle transcript upload separately if it exists
-    if (formData.transcript) {
-      // Convert file to base64 for storage
-      const reader = new FileReader();
-      reader.readAsDataURL(formData.transcript);
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        const dataToStore = {
-          ...formData,
-          transcript: null, // Remove file object
-          transcriptData: base64, // Store base64 instead
-        };
-        localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
-
-        setSubmitMessage({
-          type: 'success',
-          text: 'Redirecting to dashboard...'
-        });
-
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
-
-        setIsLoading(false);
+    try {
+      // Store form data in localStorage first
+      const dataToStore = {
+        ...formData,
+        transcript: formData.transcript ? 'uploaded' : null, // Just mark if transcript exists
       };
-    } else {
-      // Store form data in localStorage for later use after authentication
-      const dataToStore = { ...formData, transcript: null };
       localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
+
+      // Generate the 4-year plan using AI
+      setSubmitMessage({
+        type: 'success',
+        text: 'Generating your personalized 4-year plan...'
+      });
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/generate-plan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          school: formData.school || 'College of Arts & Sciences',
+          major: formData.major,
+          focusArea: formData.focusArea,
+          entryYear: formData.entryYear,
+          apCredits: formData.apCredits,
+          additionalDetails: formData.additionalDetails,
+          gpa: formData.gpa,
+          creditsCompleted: formData.creditsCompleted,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate plan');
+      }
+
+      const generatedPlan = await response.json();
+      
+      // Store the generated plan in localStorage
+      localStorage.setItem('generatedPlan', JSON.stringify(generatedPlan));
 
       setSubmitMessage({
         type: 'success',
-        text: 'Redirecting to dashboard...'
+        text: '✓ Plan generated! Redirecting...'
       });
 
-      // Redirect to dashboard where they'll be prompted to log in
+      // Redirect to plan page to view the generated plan
+      setTimeout(() => {
+        router.push('/plan');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error generating plan:', error);
+      setSubmitMessage({
+        type: 'error',
+        text: 'Failed to generate plan. Redirecting to dashboard...'
+      });
+
+      // Still redirect to dashboard even if plan generation fails
       setTimeout(() => {
         router.push('/dashboard');
-      }, 1000);
-
+      }, 2000);
+    } finally {
       setIsLoading(false);
     }
   };
