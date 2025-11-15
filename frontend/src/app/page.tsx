@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 type DropdownProps = {
@@ -193,8 +193,8 @@ export default function Home() {
   >("typing-tagline");
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
 
-  const tagline = "Your UVA Course Planning Assistant";
-  const subtitles = [
+  const tagline = useMemo(() => "Your UVA Course Planning Assistant", []);
+  const subtitles = useMemo(() => [
     "Get Help With Your 4 Year Academic Plan",
     "Craft Your Ideal UVA Journey",
     "Get Personalized Course Recommendations",
@@ -202,7 +202,7 @@ export default function Home() {
     "Optimize Your Course Load",
     "Plan for Study Abroad and Internships",
     "Maximize Your UVA Experience"
-  ];
+  ], []);
   const typingSpeed = 80;
   const deletingSpeed = 50;
   const pauseTimeAfterTagline = 1500; // Pause after main tagline is typed
