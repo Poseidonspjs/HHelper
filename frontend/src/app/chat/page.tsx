@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Message {
   role: "user" | "assistant";
@@ -14,6 +15,14 @@ interface Message {
 }
 
 export default function ChatPage() {
+  return (
+    <ProtectedRoute pageName="the AI chat assistant">
+      <ChatContent />
+    </ProtectedRoute>
+  );
+}
+
+function ChatContent() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",

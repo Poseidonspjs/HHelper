@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Mail, Globe, Instagram, Users as UsersIcon } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Club {
   id?: string;
@@ -19,6 +20,14 @@ interface Club {
 }
 
 export default function ClubsPage() {
+  return (
+    <ProtectedRoute pageName="the clubs directory">
+      <ClubsContent />
+    </ProtectedRoute>
+  );
+}
+
+function ClubsContent() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [filteredClubs, setFilteredClubs] = useState<Club[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,227 +1,613 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { BookOpen, Calendar, MessageSquare, Users, TrendingUp, CheckCircle } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function DashboardPage() {
-  const currentCourses = [
-    { code: "CS 2100", name: "Data Structures I", credits: 3, grade: "A" },
-    { code: "MATH 1320", name: "Calculus II", credits: 4, grade: "B+" },
-    { code: "ENWR 1510", name: "Academic Writing", credits: 3, grade: "A-" },
-  ];
+type DropdownProps = {
+  label: string;
+  value: string | string[];
+  onChange: (value: string | string[]) => void;
+  options: string[];
+  multiple?: boolean;
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
+};
 
-  const upcomingTasks = [
-    { title: "CS 2100 Project Due", date: "Nov 20", priority: "high" },
-    { title: "MATH 1320 Midterm", date: "Nov 22", priority: "high" },
-    { title: "Register for Spring Classes", date: "Nov 25", priority: "medium" },
-  ];
+function Dropdown({
+  label,
+  value,
+  onChange,
+  options,
+  multiple = false,
+  placeholder = "Select an option",
+  error,
+  disabled = false,
+}: DropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const recommendedClubs = [
-    { name: "UVA Computer Science Society", category: "Academic" },
-    { name: "Hoos Hacking", category: "Tech" },
-    { name: "Data Science Club", category: "Academic" },
-  ];
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const isMulti = Array.isArray(value);
+  const filteredOptions = options.filter((opt) =>
+    opt.toLowerCase().includes(searchTerm.toLowerCase()) // Filter options based on search term
+  );
 
   return (
-    <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-xl p-8 text-white">
-        <h1 className="text-4xl font-bold mb-2">Welcome back, Student!</h1>
-        <p className="text-blue-100 text-lg">
-          Your academic journey at UVA, simplified.
-        </p>
-      </div>
+    <div className="text-gray-700 relative" ref={dropdownRef}>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Current GPA</CardDescription>
-            <CardTitle className="text-3xl">3.7</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center text-sm text-green-600">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              <span>+0.2 from last semester</span>
-            </div>
-          </CardContent>
-        </Card>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full text-left flex justify-between items-center p-3 border rounded-lg bg-white text-gray-900 hover:ring-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          error ? "border-red-500 hover:ring-red-500" : "border-gray-300 hover:ring-gray-300"
+        }`}
+      >
+        <span
+          className={`truncate ${
+            (isMulti && (value as string[]).length === 0) ||
+            (!isMulti && !value)
+              ? "text-gray-400"
+              : "text-gray-900"
+          }`}
+        >
+          {isMulti
+            ? (value as string[]).length > 0
+              ? (value as string[]).join(", ")
+              : placeholder
+            : value || placeholder}
+        </span>
+        <svg
+          className={`w-4 h-4 ml-2 text-gray-500 transition-transform duration-300 ${
+            open ? "rotate-180" : "rotate-0"
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Credits Completed</CardDescription>
-            <CardTitle className="text-3xl">42</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">78 remaining</p>
-          </CardContent>
-        </Card>
+      {open && (
+        <div
+          className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto p-2 animate-bounce-soft"
+        >
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+            className="w-full p-2 mb-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          />
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Current Load</CardDescription>
-            <CardTitle className="text-3xl">15</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">credits this semester</p>
-          </CardContent>
-        </Card>
+          {filteredOptions.map((opt) => (
+            <label
+              key={opt}
+              className={`flex items-center space-x-2 p-1 cursor-pointer ${
+                multiple ? "hover:bg-gray-100 rounded" : ""
+              }`}
+            >
+              {multiple ? (
+                <input
+                  type="checkbox"
+                  value={opt}
+                  checked={(value as string[]).includes(opt)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onChange([...(value as string[]), opt]);
+                    } else {
+                      onChange(
+                        (value as string[]).filter((v) => v !== opt)
+                      );
+                    }
+                  }}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+              ) : (
+                <input
+                  type="radio"
+                  name={label}
+                  value={opt}
+                  checked={value === opt}
+                  onChange={() => {
+                    onChange(opt);
+                    setOpen(false); // close after selecting
+                  }}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+              )}
+              <span className="text-sm text-gray-700">{opt}</span>
+            </label>
+          ))}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Plan Status</CardDescription>
-            <CardTitle className="text-3xl flex items-center">
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-green-600 font-medium">On Track!</p>
-          </CardContent>
-        </Card>
-      </div>
+          {filteredOptions.length === 0 && (
+            <p className="text-sm text-gray-500 text-center">No options found</p>
+          )}
+        </div>
+      )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Current Courses */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Current Courses</CardTitle>
-            <CardDescription>Fall 2024 Semester</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {currentCourses.map((course, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">{course.code}</span>
-                      <Badge variant="secondary">{course.credits} credits</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">{course.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-blue-600">{course.grade}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Link href="/plan">
-                <Button className="w-full">View Full Plan</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming</CardTitle>
-            <CardDescription>Important dates & deadlines</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {upcomingTasks.map((task, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      task.priority === "high" ? "bg-red-500" : "bg-yellow-500"
-                    }`}
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{task.title}</p>
-                    <p className="text-xs text-gray-500">{task.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/plan">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardHeader>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
-              <CardTitle className="text-lg">Plan Editor</CardTitle>
-              <CardDescription>Build your 4-year plan with validation</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-
-        <Link href="/chat">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardHeader>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
-                <MessageSquare className="w-6 h-6 text-purple-600" />
-              </div>
-              <CardTitle className="text-lg">AI Chat</CardTitle>
-              <CardDescription>Get instant answers to UVA questions</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-
-        <Link href="/clubs">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardHeader>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-2">
-                <Users className="w-6 h-6 text-green-600" />
-              </div>
-              <CardTitle className="text-lg">Find Clubs</CardTitle>
-              <CardDescription>Discover student organizations</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-          <CardHeader>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
-              <BookOpen className="w-6 h-6 text-orange-600" />
-            </div>
-            <CardTitle className="text-lg">Resources</CardTitle>
-            <CardDescription>Academic support & career services</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Recommended Clubs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recommended Clubs</CardTitle>
-          <CardDescription>Based on your interests in Computer Science</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recommendedClubs.map((club, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg hover:border-blue-500 transition-colors"
-              >
-                <Badge className="mb-2">{club.category}</Badge>
-                <h3 className="font-semibold text-gray-900">{club.name}</h3>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <Link href="/clubs">
-              <Button variant="outline" className="w-full">
-                Browse All Clubs
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
 }
 
+interface FormData {
+  school: string;
+  major: string;
+  focusArea: string;
+  entryYear: string;
+  apCredits: string[];
+  additionalDetails: string;
+  transcript?: File | null;
+  gpa?: string;
+  creditsCompleted?: string;
+}
+
+interface FormErrors {
+  school?: string;
+  major?: string;
+  focusArea?: string;
+  entryYear?: string;
+  apCredits?: string;
+  transcript?: string;
+}
+
+export default function Home() {
+  const router = useRouter();
+  const [formData, setFormData] = useState<FormData>({
+    school: '',
+    major: "",
+    focusArea: "",
+    entryYear: "",
+    apCredits: [],
+    additionalDetails: "",
+    transcript: null,
+    gpa: "",
+    creditsCompleted: "",
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+
+  const [typedTagline, setTypedTagline] = useState(""); // For the main tagline
+  const [typedSubtitle, setTypedSubtitle] = useState(""); // For the current subtitle
+  const [animationPhase, setAnimationPhase] = useState<
+    "typing-tagline" | "waiting-for-subtitle-start" | "typing-subtitle" | "deleting-subtitle"
+  >("typing-tagline");
+  const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
+
+  const tagline = useMemo(() => "Your UVA Course Planning Assistant", []);
+  const subtitles = useMemo(() => [
+    "Get Help With Your 4 Year Academic Plan",
+    "Craft Your Ideal UVA Journey",
+    "Get Personalized Course Recommendations",
+    "Navigate Your Degree Requirements",
+    "Optimize Your Course Load",
+    "Plan for Study Abroad and Internships",
+    "Maximize Your UVA Experience"
+  ], []);
+  const typingSpeed = 80;
+  const deletingSpeed = 50;
+  const pauseTimeAfterTagline = 1500; // Pause after main tagline is typed
+  const pauseTimeAfterSubtitle = 1000; // Pause after subtitle is typed
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const handleAnimation = () => {
+      switch (animationPhase) {
+        case "typing-tagline": // Types the main tagline once
+          if (typedTagline.length < tagline.length) {
+            setTypedTagline(tagline.slice(0, typedTagline.length + 1));
+          } else {
+            timeoutId = setTimeout(() => setAnimationPhase("waiting-for-subtitle-start"), pauseTimeAfterTagline);
+          }
+          break;
+
+        case "waiting-for-subtitle-start": // Brief pause before first subtitle starts
+          setAnimationPhase("typing-subtitle");
+          break;
+
+        case "typing-subtitle": // Types the current subtitle
+          const currentSubtitle = subtitles[currentSubtitleIndex];
+          if (typedSubtitle.length < currentSubtitle.length) {
+            setTypedSubtitle(currentSubtitle.slice(0, typedSubtitle.length + 1));
+          } else {
+            timeoutId = setTimeout(() => setAnimationPhase("deleting-subtitle"), pauseTimeAfterSubtitle);
+          }
+          break;
+
+        case "deleting-subtitle": // Deletes the current subtitle
+          if (typedSubtitle.length > 0) {
+            setTypedSubtitle(typedSubtitle.slice(0, typedSubtitle.length - 1));
+          } else {
+            // Subtitle deleted, move to next one
+            setCurrentSubtitleIndex((prevIndex) => (prevIndex + 1) % subtitles.length);
+            setAnimationPhase("typing-subtitle"); // Start typing the next subtitle
+          }
+          break;
+      }
+    }
+
+    const speed = animationPhase.includes("deleting") ? deletingSpeed : typingSpeed;
+    if (animationPhase === "waiting-for-subtitle-start") {
+        timeoutId = setTimeout(handleAnimation, 0); // Immediate transition
+    } else {
+        timeoutId = setTimeout(handleAnimation, speed);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [typedTagline, typedSubtitle, animationPhase, currentSubtitleIndex, tagline, subtitles]);
+
+  // Sample data - in a real app, these would come from API endpoints
+  const school = [
+    'School of Engineering and Applied Science',
+    'McIntire School of Commerce',
+    'College of Arts & Sciences',
+    'School of Architecture',
+    'School of Nursing',
+    'School of Education and Human Development',
+    'Frank Batten School of Leadership and Public Policy',
+    'School of Data Science',
+    'School of Continuing and Professional Studies'
+  ]
+
+  const majors = [
+    'Computer Science',
+    'Business Administration',
+    'Psychology',
+    'Biology',
+    'Engineering',
+    'Economics',
+    'English',
+    'History',
+    'Mathematics',
+    'Political Science'
+  ];
+
+  const focusAreas: Record<string, string[]> = {
+    'Computer Science': ['Software Development', 'Data Science', 'Cybersecurity', 'AI/Machine Learning'],
+    'Business Administration': ['Finance', 'Marketing', 'Management', 'Entrepreneurship'],
+    'Psychology': ['Clinical Psychology', 'Cognitive Psychology', 'Social Psychology', 'Developmental Psychology'],
+    'Biology': ['Pre-Med', 'Research', 'Environmental Biology', 'Molecular Biology'],
+    'Engineering': ['Civil', 'Mechanical', 'Electrical', 'Computer Engineering'],
+    'Economics': ['Public Policy', 'Finance', 'International Economics', 'Behavioral Economics'],
+    'English': ['Literature', 'Creative Writing', 'Rhetoric', 'Linguistics'],
+    'History': ['American History', 'European History', 'World History', 'Public History'],
+    'Mathematics': ['Pure Mathematics', 'Applied Mathematics', 'Statistics', 'Actuarial Science'],
+    'Political Science': ['International Relations', 'Public Administration', 'Political Theory', 'Comparative Politics']
+  };
+
+  const entryYears = ['2025', '2026', '2027', '2028'];
+
+  const apCreditsOptions = [
+    '',
+    'AP Research',
+    'AP Seminar',
+    'AP English Language and Composition',
+    'AP English Literature and Composition',
+    'AP Spanish Language and Culture',
+    'AP Spanish Literature and Culture',
+    'AP French Language and Culture',
+    'AP German Language and Culture',
+    'AP Italian Language and Culture',
+    'AP Chinese Language and Culture',
+    'AP Japanese Language and Culture',
+    'AP Latin',
+    'AP Environmental Science',
+    'AP Physics 1',
+    'AP Physics 2',
+    'AP Physics C: Mechanics',
+    'AP Physics C: Electricity and Magnetism',
+    'AP Chemistry',
+    'AP Biology',
+    'AP Computer Science Principles',
+    'AP Statistics',
+    'AP Calculus AB',
+    'AP Calculus BC',
+    'AP Precalculus',
+    'AP Computer Science A',
+    'AP World History: Modern',
+    'AP European History',
+    'AP Human Geography',
+    'AP African American Studies',
+    'AP US History',
+    'AP US Government and Politics',
+    'AP Comparative Government and Politics',
+    'AP Macroeconomics',
+    'AP Microeconomics',
+    'AP Psychology',
+    'AP 2D Art and Design',
+    'AP 3D Art and Design',
+    'AP Drawing',
+    'AP Art History',
+    'AP Music Theory',
+  ];
+
+  const handleInputChange = (field: keyof FormData, value: string | string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
+    // Clear error when user starts typing
+    if (errors[field as keyof FormErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+
+    // Reset focus area when major changes
+    if (field === 'major') {
+      setFormData(prev => ({
+        ...prev,
+        focusArea: ''
+      }));
+    }
+  };
+
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.major) {
+      newErrors.major = 'Please select your intended major';
+    }
+    if (!formData.focusArea) {
+      newErrors.focusArea = 'Please select a focus area';
+    }
+    if (!formData.entryYear) {
+      newErrors.entryYear = 'Please select your entry year';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setSubmitMessage(null);
+
+    // Handle transcript upload separately if it exists
+    if (formData.transcript) {
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.readAsDataURL(formData.transcript);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const dataToStore = {
+          ...formData,
+          transcript: null, // Remove file object
+          transcriptData: base64, // Store base64 instead
+        };
+        localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
+
+        setSubmitMessage({
+          type: 'success',
+          text: 'Redirecting to dashboard...'
+        });
+
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1000);
+
+        setIsLoading(false);
+      };
+    } else {
+      // Store form data in localStorage for later use after authentication
+      const dataToStore = { ...formData, transcript: null };
+      localStorage.setItem('pendingUserData', JSON.stringify(dataToStore));
+
+      setSubmitMessage({
+        type: 'success',
+        text: 'Redirecting to dashboard...'
+      });
+
+      // Redirect to dashboard where they'll be prompted to log in
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800 py-8 px-4 flex items-center">
+      {/* Tagline Section */}
+      <div className="w-1/2 pr-8">
+        <h1 className="text-4xl font-bold text-white mb-8">
+          {typedTagline}
+          {(animationPhase === "typing-tagline") && <span className="animate-blink text-orange-400">|</span>}
+        </h1>
+        <p className="text-2xl font-semibold text-orange-400">
+          {typedSubtitle}{(animationPhase === "typing-subtitle" || animationPhase === "deleting-subtitle") && <span className="animate-blink text-white">|</span>}
+        </p>
+      </div>
+
+      {/* Form Section */}
+      <div className="w-1/2 bg-white rounded-lg shadow-lg p-8 space-y-6">
+        <form onSubmit={handleSubmit}>
+          {/* School Selection */}
+          <Dropdown
+            label="Intended School *"
+            value={formData.school}
+            onChange={(val) => handleInputChange("school", val as string)}
+            options={school}
+            placeholder="Select your school"
+            error={errors.school}
+          />
+
+          {/* Major Selection */}
+          <Dropdown
+            label="Intended Major *"
+            value={formData.major}
+            onChange={(val) => handleInputChange("major", val as string)}
+            options={majors}
+            placeholder="Select your major"
+            error={errors.major}
+          />
+
+          {/* Focus Area Selection */}
+            <Dropdown
+              label="Focus Area *"
+              value={formData.focusArea}
+              onChange={(value) => handleInputChange("focusArea", value)}
+              placeholder={formData.major ? "Select your focus area" : "Please select a major first"}
+              options={formData.major ? focusAreas[formData.major] || [] : []}
+              disabled={!formData.major}
+              error={errors.focusArea}
+            />
+
+          {/* Entry Year Selection */}
+          <Dropdown
+            label="Entry Year *"
+            value={formData.entryYear}
+            onChange={(val) => handleInputChange("entryYear", val as string)}
+            options={entryYears}
+            placeholder="Select your entry year"
+            error={errors.entryYear}
+          />
+
+          {/* AP/IB Credits */}
+          <Dropdown
+            label="Advanced Placement (AP/IB) Credits"
+            value={formData.apCredits}
+            onChange={(val) => handleInputChange("apCredits", val as string[])}
+            options={apCreditsOptions.slice(1)}
+            multiple
+            placeholder="Select AP/IB credits (optional)"
+            error={errors.apCredits}
+          />
+
+
+          {/* Transcript Upload for Non-First Years */}
+          {formData.entryYear && parseInt(formData.entryYear) < new Date().getFullYear() && (
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-semibold text-gray-900">For Returning Students</h3>
+
+              <div className='text-gray-700'>
+                <label htmlFor="transcript" className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Transcript (Optional)
+                </label>
+                <input
+                  id="transcript"
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setFormData(prev => ({ ...prev, transcript: file }));
+                  }}
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Upload your unofficial transcript (PDF only)</p>
+              </div>
+
+              <div className='text-gray-700'>
+                <label htmlFor="gpa" className="block text-sm font-medium text-gray-700 mb-2">
+                  Current GPA (Optional)
+                </label>
+                <input
+                  id="gpa"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4.0"
+                  value={formData.gpa}
+                  onChange={(e) => setFormData(prev => ({ ...prev, gpa: e.target.value }))}
+                  placeholder="3.50"
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                />
+              </div>
+
+              <div className='text-gray-700'>
+                <label htmlFor="creditsCompleted" className="block text-sm font-medium text-gray-700 mb-2">
+                  Credits Completed (Optional)
+                </label>
+                <input
+                  id="creditsCompleted"
+                  type="number"
+                  min="0"
+                  value={formData.creditsCompleted}
+                  onChange={(e) => setFormData(prev => ({ ...prev, creditsCompleted: e.target.value }))}
+                  placeholder="30"
+                  className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Additional Details */}
+          <div className='text-gray-700'>
+            <label htmlFor="additionalDetails" className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Details
+            </label>
+            <textarea
+              id="additionalDetails"
+              value={formData.additionalDetails}
+              onChange={(e) => handleInputChange('additionalDetails', e.target.value)}
+              placeholder="e.g., I want to study abroad in my third year, interested in internships, prefer morning classes..."
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg hover:ring-1 hover:ring-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full py-3 px-6 rounded-lg font-medium text-white transition-colors ${
+              isLoading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+            }`}
+          >
+            {isLoading ? 'Generating Your Plan...' : 'Generate My 4-Year Plan'}
+          </button>
+
+          {/* Submit Message */}
+          {submitMessage && (
+            <div className={`p-4 rounded-lg ${
+              submitMessage.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+              {submitMessage.text}
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+}
