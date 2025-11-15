@@ -33,8 +33,8 @@ export default function RootLayout({
                   
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                     <Link
-                      href="/"
-                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                      href="/dashboard"
+                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       Dashboard
