@@ -14,8 +14,8 @@ import json
 # AI/ML imports
 from anthropic import Anthropic
 from openai import OpenAI
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import SupabaseVectorStore
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import SupabaseVectorStore
 from supabase import create_client, Client
 
 # Initialize FastAPI

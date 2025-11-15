@@ -1,0 +1,137 @@
+[
+  {
+    "content": "Essential Academic Advice from UVA Students (from Reddit and student experiences):\n\n1. ACTUALLY GO TO CLASS\nYou're never going to watch recordings later. Professors notice attendance and it affects participation. Being present helps you learn better. You're paying a lot of money to be here - use it.\n\n2. Get to Know Your Professors\nIntroduce yourself during the first week. Attend office hours early in the semester (not just before exams). Professors give grace on extensions when they know you. They're full of wisdom outside the classroom. This leads to research opportunities and strong recommendation letters.\n\n3. Don't Compare Yourself to Others\nThere will always be people who seem smarter or better. Focus on doing your personal best. Your mental health matters more than perfect grades. GPA matters less than you think (unless pre-med or law school).\n\n4. Use Your Resources\n- Writing Center: free consultations for any writing project\n- Teaching Resource Center: peer tutoring for most intro courses  \n- Office hours: professors actually want to help you\n- Academic coaching: time management and study strategies\n- CS TAs: incredibly helpful for debugging and concepts\n\n5. Course Planning Tips\n- Read Lou's List AND Course Forum before registering\n- Talk to upperclassmen about specific professors\n- Balance hard classes with enjoyable ones each semester\n- Leave room in schedule for unexpected opportunities\n- Don't take all your hardest classes in one semester\n\n6. Time Management\n- Set boundaries before classes start (e.g., no work after 10pm)\n- Don't sacrifice sleep, meals, or mental health for grades\n- Find YOUR study routine (everyone is different)\n- Use syllabi to plan ahead for busy weeks\n- Start assignments early to avoid all-nighters\n\n7. CS-Specific Advice\n- CS 2100 is a make-or-break course - take it seriously\n- CS 2120 is required for almost everything - don't delay\n- Don't take CS 2100, 2120, and 2130 all together\n- Join CSS and go to office hours religiously\n- Start coding assignments the day they're released\n- Test your code thoroughly before submitting",
+    "source": "https://www.reddit.com/r/UVA/",
+    "sourceType": "student_advice",
+    "title": "Essential Academic Success Tips",
+    "tags": [
+      "academic",
+      "advice",
+      "studying",
+      "success",
+      "reddit"
+    ]
+  },
+  {
+    "content": "First Year Advice from UVA Upperclassmen:\n\nSOCIAL LIFE:\n- Say yes to everything the first month (within reason)\n- Your first friend group probably won't be your final one - that's normal\n- Go to every social event you can for the first 3 months\n- Join at least one club that interests you (Activities Fair!)\n- Don't exclusively hang out with your hallmates\n- It's okay to branch out and make new friends all four years\n\nACADEMICS:\n- Don't decide your major first semester\n- Take classes you're genuinely interested in, not just requirements\n- 8am classes sound fine in summer but are brutal in reality\n- Actually read the syllabus on day one\n- Form study groups early in the semester\n- Go to office hours even if you don't have questions\n\nPRACTICAL TIPS:\n- Get a bike or learn the UTS bus routes\n- Bodo's Bagels is worth the line\n- Clem library is best for late-night studying  \n- Skip the Newcomb vent (it smells terrible)\n- AFC pool is a hidden gem for relaxation\n- Do laundry on weekday afternoons (weekends are packed)\n\nMENTAL HEALTH:\n- Everyone struggles with the transition\n- Homesickness is completely normal\n- Don't compare your real life to others' social media\n- Use CAPS if you're struggling\n- Take mental health days when needed\n- Call your family and friends from home\n\nTHINGS TO DO:\n- Football game vs Virginia Tech (even if you don't like football)\n- Attend Lighting of the Lawn in December\n- Go to Foxfield (spring and fall races)\n- Hike Old Rag or Humpback Rocks\n- Explore the Corner and downtown Charlottesville\n- Take advantage of free student events\n\nMISTAKES TO AVOID:\n- Skipping the first two weeks of classes\n- Not attending Activities Fair\n- Only hanging out in your room\n- Ignoring red flags in your mental health\n- Not asking for help when you need it\n- Comparing yourself to everyone else",
+    "source": "https://www.reddit.com/r/UVA/comments/16r5nf0/a_comprehensive_uva_guide/",
+    "sourceType": "student_advice",
+    "title": "Comprehensive First Year Guide",
+    "tags": [
+      "first-year",
+      "advice",
+      "social",
+      "academic",
+      "reddit"
+    ]
+  },
+  {
+    "content": "Computer Science Prerequisites and Course Path at UVA:\n\nREQUIRED CORE SEQUENCE:\n\n1. CS 1110 or CS 1111 (First Programming Course)\n- CS 1110: For students with NO programming experience\n- CS 1111: Accelerated version if you have coding background\n- Learn Python fundamentals\n- Take this FIRST SEMESTER if possible\n\n2. CS 2100 (Data Structures & Algorithms I) - THE GATEWAY COURSE\n- Prerequisites: CS 1110/1111\n- This is THE most important course in the major\n- Covers arrays, linked lists, stacks, queues, trees, recursion\n- Introduces Big-O notation and algorithm analysis\n- Many students struggle - take seriously!\n- You CANNOT take upper-level CS without passing this\n\n3. CS 2120 (Discrete Math & Theory) - REQUIRED FOR ALMOST EVERYTHING\n- Prerequisites: CS 2100\n- Logic, proofs, sets, functions, relations, graphs\n- Prerequisite for almost ALL 3000/4000 level CS courses\n- Don't delay taking this!\n\n4. CS 2130 (Computer Systems & Organization)\n- Prerequisites: CS 2100\n- C/C++ programming, memory management, pointers\n- Required for systems courses (OS, Networks, Security)\n- Challenging but essential for understanding computers\n\nTYPICAL COURSE SEQUENCE:\nFirst Year Fall: CS 1110, MATH 1310, Gen Eds\nFirst Year Spring: CS 2100, MATH 1320, Gen Eds\nSecond Year Fall: CS 2120, CS 2130, MATH 2310\nSecond Year Spring: CS 3100, CS 3140, Elective\n\nIMPORTANT UPPER-LEVEL COURSES:\n- CS 3140: Software Development Essentials (take ASAP!)\n- CS 3100: Data Structures & Algorithms II\n- CS 4102: Algorithms (very challenging, very important)\n- CS 4414: Operating Systems\n- CS 4750: Database Systems\n- CS 4710: Artificial Intelligence\n- CS 4774: Machine Learning (requires linear algebra)\n- CS 4630: Defense Against the Dark Arts (Security)\n\nCRITICAL TIPS:\n- Complete CS 2100 and 2120 ASAP to unlock upper-levels\n- CS 2100 is the hardest course for many - don't take lightly\n- Don't take CS 2100, 2120, and 2130 all in one semester\n- Join CSS (Computer Science Society) for community\n- Go to TA office hours - they're incredibly helpful\n- Start coding projects early, test thoroughly\n- Lou's List shows which semesters courses are offered",
+    "source": "https://uvacsadvising.org",
+    "sourceType": "course_catalog",
+    "title": "CS Prerequisites and Path",
+    "tags": [
+      "computer-science",
+      "CS",
+      "prerequisites",
+      "course-planning"
+    ]
+  },
+  {
+    "content": "Course Registration Guide at UVA:\n\nREGISTRATION BASICS:\n- Registration happens twice per year (for next semester)\n- First-years register during orientation with advisor help\n- Upper-class students get enrollment appointments by class year\n- Full-time: 12-18 credits (typical is 15 credits = 5 courses)\n- Use SIS (Student Information System) to register\n\nKEY TOOLS:\n- SIS: Official system for registration\n- Lou's List: Shows course history, enrollment trends\n- Course Forum: Student reviews and professor ratings\n- Academic advisors: Help plan your schedule\n\nIMPORTANT DATES & POLICIES:\n- Add/drop period: First 2 weeks (adjust without penalty)\n- Withdrawal deadline: Around week 10\n- Grade options: Graded, Pass/Fail, Audit\n- Prerequisites must be completed before dependent courses\n\nREGISTRATION STRATEGY:\n1. Wake up EARLY for your enrollment appointment time\n2. Have backup courses ready (popular courses fill fast)\n3. Check Course Forum for professor reviews\n4. Balance hard and easy/enjoyable classes\n5. Consider class times (8am is brutal)\n6. Leave gaps for lunch and travel time\n7. Check Lou's List for when courses are typically offered\n\nCOMMON MISTAKES:\n- Overloading first semester (stick to 15 credits)\n- Not having backup plans\n- Scheduling back-to-back classes across Grounds\n- Taking all hard classes in one semester\n- Not checking prerequisites carefully\n\nTIPS FROM STUDENTS:\n- Lou's List shows which semesters courses run\n- Course Forum shows professor difficulty ratings\n- Talk to upperclassmen about specific professors\n- Some courses only offered once per year\n- Popular electives fill up immediately\n- Having a balanced schedule is key to success",
+    "source": "https://records.ureg.virginia.edu",
+    "sourceType": "policy",
+    "title": "Course Registration Guide",
+    "tags": [
+      "registration",
+      "courses",
+      "planning",
+      "SIS"
+    ]
+  },
+  {
+    "content": "Getting Involved at UVA: Clubs, Activities, and Organizations\n\nWHEN TO GET INVOLVED:\n- Activities Fair (first week of fall) - MUST ATTEND!\n- First few weeks: clubs have open meetings\n- Spring semester: still totally acceptable to join\n- Don't feel pressured to join everything immediately\n\nHOW MANY CLUBS?\n- Quality over quantity: 1-2 meaningful > 6 superficial\n- Don't let peer pressure push you into too much\n- You can always add more later\n- It's okay to quit clubs that aren't working out\n\nTYPES OF ORGANIZATIONS:\n\nCIOs (Contracted Independent Organizations):\n- Receive UVA funding and support\n- 800+ registered groups\n- Range from academic to social to service\n\nPopular Categories:\n- Technology: CSS, ACM, HooHacks, WICS, Data Science Club\n- Service: Madison House (huge!), Habitat, ASB\n- Cultural: BSA, LSA, SASA, CSA, KSA\n- Business: Entrepreneurship Club, Consulting, Finance\n- Arts: Drama, A Cappella, Dance, Photography\n- Media: Cavalier Daily, WUVA Radio\n- Recreation: Outdoors Club, Running, Climbing\n\nCS-SPECIFIC ORGANIZATIONS:\n- CSS (Computer Science Society): Largest CS community\n- ACM: Competitive programming, tech talks\n- HooHacks: Runs Virginia's largest hackathon\n- WICS: Supporting women in CS\n- Data Science Club: ML and analytics\n- SIGAI: AI/ML projects and learning\n- Cyber Security Club: CTFs and competitions\n- Girls Who Code: Breaking barriers in tech\n\nFINDING YOUR FIT:\n- Try 3-5 clubs first month\n- Attend several meetings before committing\n- Look for communities, not just resume lines\n- Leadership opportunities in 2nd/3rd year\n- Clubs are where you meet best friends\n\nTIPS FROM STUDENTS:\n- Activities Fair is overwhelming - don't sign up for everything\n- Go to first meetings even if intimidated\n- Most clubs are beginner-friendly\n- Don't quit too early (give it 3-4 meetings)\n- Balance academic clubs with fun/social ones\n- Join at least one club related to career interests",
+    "source": "https://studentaffairs.virginia.edu",
+    "sourceType": "resource",
+    "title": "Getting Involved Guide",
+    "tags": [
+      "clubs",
+      "activities",
+      "involvement",
+      "CIOs"
+    ]
+  },
+  {
+    "content": "Career Development Timeline and Resources at UVA:\n\nCENTER FOR CAREER DEVELOPMENT (CCD):\n- Location: 3rd floor Newcomb Hall\n- Free for all UVA students (use it!)\n- Services: Resume reviews, mock interviews, career counseling\n- Platform: UVA Career Connect (Handshake) for jobs/internships\n\nYEAR-BY-YEAR TIMELINE:\n\nFIRST YEAR:\n- Explore interests (no pressure to decide!)\n- Attend career fairs just to learn\n- Join professionally-oriented clubs\n- Build relationships with professors\n- Start thinking about summer plans\n\nSECOND YEAR:\nFall:\n- Attend career fairs seriously\n- Get resume reviewed by CCD\n- Join professional clubs\n- Research summer internship opportunities\n- Network at company info sessions\n\nSpring:\n- Apply for summer internships\n- Practice interviewing (mock interviews at CCD)\n- Build LinkedIn profile\n- Connect with alumni on LinkedIn\n\nTHIRD YEAR:\n- Summer internships (often lead to full-time offers)\n- On-Grounds recruiting (companies interview on campus)\n- Career fairs for full-time positions\n- Networking events\n- Graduate school prep if applicable\n\nFOURTH YEAR:\n- Full-time job applications\n- On-Grounds recruiting\n- Offer evaluation and negotiation\n- Grad school applications if applicable\n\nKEY RESOURCES:\n- UVA Career Connect (Handshake): Job/internship postings\n- Career Fairs: Fall and spring each year\n- On-Grounds Recruiting: Top companies interview here\n- Alumni Network: Hoos helping Hoos\n- Industry-specific career counselors at CCD\n\nPOPULAR PATHS FOR CS STUDENTS:\n- Software Engineering: Big Tech, startups, finance\n- Data Science/ML: Research, analytics, AI companies\n- Consulting: Tech consulting, strategy firms\n- Product Management: Tech companies\n- Graduate School: MS in CS, PhD programs\n\nTIPS FOR CS STUDENTS:\n- Start building projects first year\n- Contribute to open source\n- Do LeetCode for technical interviews\n- Attend company info sessions (free food!)\n- Network with alumni on LinkedIn\n- Apply to many companies (it's a numbers game)\n- Big Tech recruit heavily at UVA",
+    "source": "https://career.virginia.edu",
+    "sourceType": "resource",
+    "title": "Career Development Timeline",
+    "tags": [
+      "career",
+      "internships",
+      "jobs",
+      "professional-development"
+    ]
+  },
+  {
+    "content": "Housing at UVA: Comprehensive Guide\n\nFIRST YEAR HOUSING:\n- All first-years live on Grounds\n- Assignments over summer (no choice)\n- Most rooms are doubles with shared bathrooms\n- You'll have a Residential Advisor (RA)\n\nRESIDENTIAL AREAS:\n- Alderman Road: Newest, AC, suite-style (most wanted)\n- Observatory Hill: Traditional dorms\n- Old Dorms (McCormick): Historic, recently renovated\n- Hereford: Self-contained with own dining hall\n\nFIRST YEAR TIPS:\n- Fill out housing survey honestly\n- Reach out to roommate before move-in\n- Bring basics but coordinate big items\n- Get to know your hallmates first week\n- Attend residential events\n- Your RA is a resource - use them!\n\nSECOND YEAR OPTIONS:\n\nOn-Grounds Housing:\n- Enter housing lottery with friends\n- Form groups to live together\n- More independence than first year\n- Can apply to be RA (free housing + stipend!)\n\nOff-Grounds Housing:\n- Very popular choice\n- Start looking January/February\n- Form group with friends\n- Various neighborhoods around Grounds\n\nPOPULAR OFF-GROUNDS AREAS:\n- The Corner: Very close to central Grounds, expensive\n- JPA (Jefferson Park Ave): Walkable, popular with students\n- Rugby Road: Near fraternities/sororities\n- Venable: More affordable, bit further\n- Wertland/14th St: High student density\n\nOFF-GROUNDS LIVING TIPS:\n- Start searching EARLY (January for August)\n- Visit properties in person\n- Read leases carefully (usually 12-month)\n- Budget for utilities, internet, parking\n- Use Facebook groups for housing/roommates\n- Many students sublet for summer\n\nCOSTS (Approximate):\n- On-Grounds: $7,000-10,000/year\n- Off-Grounds: $600-900/month per person\n- Utilities: $50-100/month\n- Parking: $50-150/month (if needed)\n\nROOMMATE ADVICE:\n- Communicate expectations early\n- Discuss cleanliness, noise, guests\n- Create written roommate agreement\n- Address conflicts early and respectfully\n- It's okay if you're not best friends\n- Use RAs/staff for serious conflicts\n\nSPECIAL HOUSING:\n- Lawn/Range: Single rooms, huge honor\n- Brown College: Residential learning community\n- Language Houses: Immersive living\n- RA Positions: Free housing + $3,000+ stipend",
+    "source": "https://housing.virginia.edu",
+    "sourceType": "resource",
+    "title": "Housing Guide",
+    "tags": [
+      "housing",
+      "dorms",
+      "off-grounds",
+      "residential-life"
+    ]
+  },
+  {
+    "content": "Mental Health and Wellness at UVA:\n\nIT'S OKAY TO STRUGGLE:\n- College transition is hard for EVERYONE\n- You're not alone if you're having difficulties\n- Seeking help is strength, not weakness\n- Most students use mental health resources at some point\n\nCAPS (COUNSELING AND PSYCHOLOGICAL SERVICES):\n- FREE counseling for all students\n- Individual therapy, group therapy, workshops\n- Crisis support available 24/7: (434) 243-5150\n- Initial consultation to match you with support\n- Location: Student Health & Wellness building\n\nSTUDENT HEALTH & WELLNESS:\n- Medical care for illness and injuries\n- Psychiatry for medication management\n- Health promotion and wellness programs\n- Nutrition counseling\n- LGBTQ+ care specialists\n\nOTHER SUPPORT RESOURCES:\n- Academic coaching (time management, study skills)\n- OASIS (Black students support)\n- Women's Center\n- LGBTQ Center\n- Religious life communities\n- Peer support programs\n\nSELF-CARE STRATEGIES:\n- Set boundaries (e.g., no work after 10pm)\n- Prioritize sleep, nutrition, exercise\n- Stay connected with family and friends\n- Join clubs for social connection\n- Use AFC (gym, pool, classes)\n- Get outside (Charlottesville is beautiful)\n- Practice saying no to commitments\n\nCRISIS SUPPORT:\n- CAPS 24/7 Hotline: (434) 243-5150\n- UVA Police: (434) 924-7166\n- National Suicide Prevention: 988\n- Crisis Text Line: Text HOME to 741741\n- Safe Rides: For safe transportation\n\nRED FLAGS TO WATCH:\n- Persistent sadness or anxiety\n- Withdrawal from friends and activities\n- Changes in sleep or eating\n- Difficulty concentrating\n- Thoughts of self-harm\n- Substance use increasing\n\nACADEMIC STRESS:\n- Remember: B's and C's are okay\n- GPA matters less than you think\n- One bad test doesn't ruin your future\n- Use office hours and tutoring\n- Ask for extensions when needed\n- Take mental health days\n- Your worth ≠ your GPA\n\nSTUDENT WISDOM:\n- Prioritize mental health over grades\n- Find a therapist you click with\n- Exercise and sunlight genuinely help\n- Talk to someone when overwhelmed\n- Everyone is struggling at least a little\n- Be honest about how you're doing\n- It's okay to take a semester off if needed",
+    "source": "https://www.studenthealth.virginia.edu",
+    "sourceType": "resource",
+    "title": "Mental Health and Wellness",
+    "tags": [
+      "mental-health",
+      "wellness",
+      "CAPS",
+      "support",
+      "counseling"
+    ]
+  },
+  {
+    "content": "UVA Culture, Traditions, and Lingo:\n\nESSENTIAL UVA LINGO:\n- Grounds (NOT campus!)\n- First Year (NOT freshman)\n- The Lawn: Iconic heart of Grounds\n- Rotunda: Thomas Jefferson's library\n- The Corner: Restaurant/shop area near Grounds\n- AFC: Aquatic & Fitness Center (gym)\n- Clem: Clemons Library (24/7 during semester)\n- Newcomb: Dining hall and student center\n- E-School: School of Engineering\n- Comm School: McIntire School of Commerce\n\nMUST-ATTEND TRADITIONS:\n- Lighting of the Lawn: December, absolutely magical\n- Football Saturdays: Entire day event, wear orange\n- Foxfield Races: Spring and fall, huge social event\n- Springfest: End of year celebration\n- Final Exercises: Graduation on the Lawn\n- Virginia vs Virginia Tech football: THE game\n\nFUN TRADITIONS:\n- Streak the Lawn: Naked run (usually at night)\n- Run with Jim: Saturday morning runs\n- Touching Homer's foot: Bad luck if you do\n- Walking on Lawn: Encouraged (Jefferson wanted this)\n\nFOOD CULTURE:\n- Bodo's Bagels: Worth the line, get cheddar jalapeño\n- Christian's Pizza: Corner institution\n- Roots: Natural foods, good late night\n- O-Hill: Best dining hall (waffle bar!)\n- Dining hall meal exchanges: Use strategically\n\nGROUNDS GEOGRAPHY:\n- Central Grounds: Lawn, Rotunda, main buildings\n- Observatory Hill: Some dorms, athletics\n- Scott Stadium: Football\n- JPJ Arena: Basketball, concerts\n- Barracks Road: Target, Trader Joe's, restaurants\n\nTRANSPORTATION:\n- Walking: Most things accessible on foot\n- UTS Buses: Free university buses\n- CAT Buses: Free city buses with ID\n- Biking: Popular and efficient\n- Parking: Expensive and limited (don't need car)\n\nSURVIVAL TIPS:\n- Skip the Newcomb vent (smells bad)\n- Clem library best for late studying\n- AFC pool is hidden gem\n- Bodo's line moves faster than it looks\n- Mad Bowl in Newcomb for hanging out\n- O-Hill dining hall > other dining halls\n\nFOOTBALL SATURDAYS:\n- Wear orange and blue\n- Tailgating starts early morning\n- Student section is on the hill\n- Stay for whole game (even if losing)\n- After-parties everywhere\n- Virginia Tech game is biggest\n\nCHARLOTTESVILLE:\n- Downtown Mall: Pedestrian outdoor mall\n- Carter Mountain: Apple picking, views\n- Hiking: Old Rag, Humpback Rocks nearby\n- Wineries: Wine country (21+)\n- Shenandoah: Beautiful national park nearby",
+    "source": "https://www.virginia.edu",
+    "sourceType": "culture",
+    "title": "UVA Traditions and Culture",
+    "tags": [
+      "traditions",
+      "culture",
+      "lingo",
+      "student-life"
+    ]
+  },
+  {
+    "content": "Undergraduate Research at UVA:\n\nWHY DO RESEARCH:\n- Develop critical thinking skills\n- Work closely with faculty\n- Strengthen grad/med school applications\n- Get paid for meaningful work\n- Contribute to discoveries\n- Build resume and get strong rec letters\n\nHOW TO FIND RESEARCH:\n\n1. Browse Faculty Websites:\n- Look at department faculty pages\n- Read recent publications\n- Find topics that interest you\n\n2. Email Professors:\n- Express genuine interest in their work\n- Attach resume/transcript\n- Be professional and concise\n- Follow up if no response in week\n\n3. Use Resources:\n- USOAR (STEM research support)\n- Department research coordinators\n- Academic advisors\n- Research-focused clubs\n\n4. Attend Events:\n- Department seminars\n- Research poster sessions\n- Research symposium\n\nFUNDING OPPORTUNITIES:\n\nUSOAR (Undergraduate Science Opportunities):\n- Supports STEM research\n- Mentorship and community\n- Research funding available\n- Application process\n\nDouble Hoo Research Grant:\n- Fund student-designed projects\n- Applications twice per year\n- Covers supplies, travel, participants\n\nSummer Research Programs:\n- Paid full-time positions\n- Many departments offer these\n- Apply in spring for summer\n\nAcademic Credit:\n- Independent study courses (4993, 4998)\n- Get credit for research\n- Discuss with mentor and advisor\n\nCS RESEARCH AREAS AT UVA:\n- Machine Learning / AI\n- Computer Vision\n- Natural Language Processing\n- Systems and Security\n- Software Engineering\n- Human-Computer Interaction\n- Algorithms and Theory\n\nRESEARCH TIMELINE:\n\nFirst Year:\n- Explore interests through classes\n- Attend research presentations\n- Learn about faculty research\n\nSecond Year:\n- Reach out to potential mentors\n- Start in a lab (even as volunteer)\n- Learn techniques and tools\n\nThird/Fourth Year:\n- Independent project\n- Present findings\n- Co-author publications\n- Use for grad school/job apps\n\nTIPS FROM STUDENTS:\n- Start early (positions fill up)\n- Be persistent if professors say no\n- Don't need perfect grades\n- Show genuine interest\n- Be reliable once you start\n- Research looks great on resume\n- Okay to switch labs if bad fit\n- CS research can lead to publications",
+    "source": "https://research.virginia.edu",
+    "sourceType": "resource",
+    "title": "Undergraduate Research",
+    "tags": [
+      "research",
+      "USOAR",
+      "opportunities",
+      "faculty"
+    ]
+  },
+  {
+    "content": "Financial Aid and Money Management at UVA:\n\nFINANCIAL AID:\n- AccessUVA: UVA's aid program\n- Meets 100% of demonstrated need\n- No loans for families under $80k income\n- Loans capped at $4,500/year for others\n- File FAFSA annually by deadline\n\nFINANCIAL AID OFFICE:\n- Location: Carruthers Hall\n- CSS Profile required for first-years\n- Update if financial situation changes\n- Don't hesitate to reach out\n\nSTUDENT EMPLOYMENT:\n\nWork-Study:\n- Part of financial aid package\n- Various on-campus positions\n- Typical: $12-15/hour\n- Limit: 20 hours/week\n\nNon-Work-Study:\n- Available to all students\n- Library, dining, rec centers\n- Similar pay rates\n\nRA Positions:\n- Free housing + stipend ($3,000+)\n- Leadership experience\n- Apply second year\n\nTEXTBOOK COSTS:\n\nMoney-Saving Tips:\n- Don't buy before first class\n- Check library reserves\n- Look for free PDFs (legally)\n- Buy used from other students\n- Rent from Amazon or Chegg\n- Many classes have free online resources\n\nFREE RESOURCES:\n- AFC (gym and fitness)\n- Most student org events\n- Student Activities movies\n- Museums on Grounds\n- UTS and CAT buses\n- Many campus events\n\nSTUDENT DISCOUNTS:\n- Amazon Prime Student (6 months free)\n- Spotify + Hulu bundle\n- Apple Music\n- Many Charlottesville restaurants\n- Adobe Creative Cloud\n\nBUDGETING TIPS:\n- Track spending first month\n- Set limits for going out\n- Cook when possible (limited first year)\n- Use meal exchanges strategically\n- Share streaming services\n- Buy used textbooks\n- Take advantage of free food events\n\nUNEXPECTED COSTS:\n- Course lab fees\n- Printing ($20-30/semester)\n- Laundry\n- Organization dues\n- Social activities\n- Transportation home\n\nEMERGENCY RESOURCES:\n- Emergency grants available\n- Hoos First (first-gen/low-income support)\n- Food pantry through Madison House\n- Don't be afraid to ask for help\n\nCS STUDENT FINANCIAL NOTES:\n- Laptop: $800-1500 (necessary)\n- No special software costs (free for students)\n- Internships pay well ($20-50/hour)\n- Tech companies recruit heavily\n- Many scholarship opportunities",
+    "source": "https://sfs.virginia.edu",
+    "sourceType": "resource",
+    "title": "Financial Aid and Budgeting",
+    "tags": [
+      "financial-aid",
+      "money",
+      "budgeting",
+      "costs"
+    ]
+  }
+]
