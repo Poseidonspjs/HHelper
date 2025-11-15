@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:populate": "node scripts/populate-db.js",
+    "db:import": "node scripts/import-scraped-data.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.5.0",
