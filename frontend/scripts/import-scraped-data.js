@@ -1,0 +1,249 @@
+/**
+ * Import Scraped Data to Supabase
+ * Reads JSON files and inserts into database
+ */
+
+const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
+const path = require('path');
+
+const prisma = new PrismaClient();
+
+// Paths to JSON files
+const COURSES_FILE = path.join(__dirname, '../../backend/scrapers/uva_courses.json');
+const CLUBS_FILE = path.join(__dirname, '../../backend/scrapers/uva_clubs.json');
+const RAG_FILE = path.join(__dirname, '../../backend/scrapers/uva_rag_content.json');
+
+async function importCourses() {
+  console.log('\n📚 Importing Courses...');
+  
+  if (!fs.existsSync(COURSES_FILE)) {
+    console.log('   ⚠️  Course file not found, skipping');
+    return;
+  }
+  
+  const courses = JSON.parse(fs.readFileSync(COURSES_FILE, 'utf8'));
+  console.log(`   Found ${courses.length} courses to import`);
+  
+  let imported = 0;
+  let skipped = 0;
+  let errors = 0;
+  
+  // Process in batches to avoid memory issues
+  const batchSize = 100;
+  for (let i = 0; i < courses.length; i += batchSize) {
+    const batch = courses.slice(i, i + batchSize);
+    
+    for (const course of batch) {
+      try {
+        // Clean up the data
+        const cleanCourse = {
+          courseCode: course.courseCode?.trim(),
+          title: course.title?.trim() || 'Untitled Course',
+          description: course.description?.trim() || null,
+          credits: parseInt(course.credits) || 3,
+          department: course.department?.trim() || 'MISC',
+          level: parseInt(course.level) || 1000,
+          semesters: Array.isArray(course.semesters) ? course.semesters : ['Fall', 'Spring']
+        };
+        
+        if (!cleanCourse.courseCode) {
+          skipped++;
+          continue;
+        }
+        
+        await prisma.course.upsert({
+          where: { courseCode: cleanCourse.courseCode },
+          update: cleanCourse,
+          create: cleanCourse
+        });
+        
+        imported++;
+        
+        // Show progress every 100 courses
+        if (imported % 100 === 0) {
+          console.log(`   Progress: ${imported}/${courses.length} courses imported...`);
+        }
+      } catch (error) {
+        errors++;
+        if (errors < 5) { // Only show first few errors
+          console.error(`   ✗ Error importing ${course.courseCode}:`, error.message);
+        }
+      }
+    }
+  }
+  
+  console.log(`\n   ✅ Imported: ${imported}`);
+  console.log(`   ⚠️  Skipped: ${skipped}`);
+  if (errors > 0) {
+    console.log(`   ❌ Errors: ${errors}`);
+  }
+}
+
+async function importClubs() {
+  console.log('\n🎯 Importing Clubs...');
+  
+  if (!fs.existsSync(CLUBS_FILE)) {
+    console.log('   ⚠️  Clubs file not found, skipping');
+    return;
+  }
+  
+  const clubs = JSON.parse(fs.readFileSync(CLUBS_FILE, 'utf8'));
+  console.log(`   Found ${clubs.length} clubs to import`);
+  
+  let imported = 0;
+  let errors = 0;
+  
+  for (const club of clubs) {
+    try {
+      // Clean up the data
+      const cleanClub = {
+        name: club.name?.trim(),
+        description: club.description?.trim() || null,
+        category: club.category?.trim() || 'General',
+        email: club.email?.trim() || null,
+        website: club.website?.trim() || null,
+        instagramHandle: club.instagramHandle?.trim() || null,
+        source: club.source?.trim() || 'scraped'
+      };
+      
+      if (!cleanClub.name) {
+        continue;
+      }
+      
+      // Upsert club
+      const createdClub = await prisma.club.upsert({
+        where: { name: cleanClub.name },
+        update: cleanClub,
+        create: cleanClub
+      });
+      
+      // Handle tags if they exist
+      if (Array.isArray(club.tags) && club.tags.length > 0) {
+        // Delete existing tags
+        await prisma.clubTag.deleteMany({
+          where: { clubId: createdClub.id }
+        });
+        
+        // Create new tags
+        for (const tag of club.tags) {
+          if (tag?.trim()) {
+            await prisma.clubTag.create({
+              data: {
+                clubId: createdClub.id,
+                tag: tag.trim()
+              }
+            });
+          }
+        }
+      }
+      
+      imported++;
+      console.log(`   ✓ ${cleanClub.name}`);
+      
+    } catch (error) {
+      errors++;
+      if (errors < 5) {
+        console.error(`   ✗ Error importing ${club.name}:`, error.message);
+      }
+    }
+  }
+  
+  console.log(`\n   ✅ Imported: ${imported} clubs`);
+  if (errors > 0) {
+    console.log(`   ❌ Errors: ${errors}`);
+  }
+}
+
+async function importRagContent() {
+  console.log('\n🤖 Importing RAG Content...');
+  
+  if (!fs.existsSync(RAG_FILE)) {
+    console.log('   ⚠️  RAG content file not found, skipping');
+    return;
+  }
+  
+  const documents = JSON.parse(fs.readFileSync(RAG_FILE, 'utf8'));
+  console.log(`   Found ${documents.length} documents to import`);
+  console.log('   Note: Embeddings will be generated by the RAG system when needed\n');
+  
+  let imported = 0;
+  let errors = 0;
+  
+  for (const doc of documents) {
+    try {
+      // Clean up the data
+      const cleanDoc = {
+        content: doc.content?.trim(),
+        source: doc.source?.trim() || 'unknown',
+        sourceType: doc.sourceType?.trim() || 'general',
+        title: doc.title?.trim() || 'Untitled',
+        metadata: {
+          tags: doc.tags || []
+        }
+      };
+      
+      if (!cleanDoc.content || cleanDoc.content.length < 10) {
+        continue;
+      }
+      
+      await prisma.ragDocument.create({
+        data: cleanDoc
+      });
+      
+      imported++;
+      console.log(`   ✓ ${cleanDoc.title}`);
+      
+    } catch (error) {
+      errors++;
+      if (errors < 5) {
+        console.error(`   ✗ Error importing document:`, error.message);
+      }
+    }
+  }
+  
+  console.log(`\n   ✅ Imported: ${imported} documents`);
+  if (errors > 0) {
+    console.log(`   ❌ Errors: ${errors}`);
+  }
+}
+
+async function main() {
+  console.log('='.repeat(60));
+  console.log('🎓 HoosHelper - Import Scraped Data');
+  console.log('='.repeat(60));
+  
+  const startTime = Date.now();
+  
+  try {
+    await importCourses();
+    await importClubs();
+    await importRagContent();
+    
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    
+    console.log('\n' + '='.repeat(60));
+    console.log('🎉 Import Complete!');
+    console.log('='.repeat(60));
+    console.log(`\n⏱️  Time taken: ${elapsed}s`);
+    console.log('\n✅ Your Supabase database now has:');
+    console.log('   • Courses from UVA course catalog');
+    console.log('   • Student clubs and organizations');
+    console.log('   • RAG documents for AI chat');
+    console.log('\n🚀 Your app is now using real scraped data!');
+    console.log('   Visit: http://localhost:3000\n');
+    
+  } catch (error) {
+    console.error('\n❌ Fatal Error:', error);
+    console.error('\nMake sure:');
+    console.error('  1. Database schema is pushed (npm run db:push)');
+    console.error('  2. DATABASE_URL is set in .env.local');
+    console.error('  3. JSON files exist in backend/scrapers/');
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();
+

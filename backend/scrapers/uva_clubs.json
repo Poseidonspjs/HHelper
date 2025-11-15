@@ -1,0 +1,539 @@
+[
+  {
+    "name": "Computer Science Society (CSS)",
+    "description": "The Computer Science Society is UVA's largest CS community, hosting tech talks, workshops, and social events. We connect students with industry professionals and provide mentorship opportunities.",
+    "category": "Academic",
+    "tags": [
+      "Technology",
+      "Computer Science",
+      "Networking",
+      "Career"
+    ],
+    "email": "css@virginia.edu",
+    "website": "https://css.virginia.edu",
+    "instagramHandle": "uva_css",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Association for Computing Machinery (ACM)",
+    "description": "UVA's chapter of ACM hosting competitive programming competitions, tech talks, and academic discussions. Includes ICPC team.",
+    "category": "Academic",
+    "tags": [
+      "Technology",
+      "Computer Science",
+      "Competition",
+      "Programming"
+    ],
+    "email": "acm-officers@virginia.edu",
+    "website": "https://acm.virginia.edu",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "HooHacks",
+    "description": "UVA's premier hackathon organization hosting HooHacks, Virginia's largest collegiate hackathon with 500+ students annually.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Hackathons",
+      "Programming",
+      "Events"
+    ],
+    "website": "https://hooshacking.org",
+    "instagramHandle": "hooshacking",
+    "email": "hackathon.virginia@gmail.com",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Women in Computing Sciences (WICS)",
+    "description": "Supporting women and non-binary individuals in technology through mentorship, technical workshops, networking events, and industry partnerships.",
+    "category": "Academic",
+    "tags": [
+      "Technology",
+      "Computer Science",
+      "Women",
+      "Diversity"
+    ],
+    "website": "https://wics.virginia.edu",
+    "instagramHandle": "uva_wics",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Data Science Club",
+    "description": "Learn and apply data science, machine learning, and analytics through hands-on workshops, Kaggle competitions, and industry speaker events.",
+    "category": "Academic",
+    "tags": [
+      "Technology",
+      "Data Science",
+      "Machine Learning",
+      "Analytics"
+    ],
+    "email": "dsacatuva@gmail.com",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Special Interest Group on AI (SIGAI)",
+    "description": "Comprehensive AI club expanding accessibility and engagement of AI through projects, lectures, guest speakers, hackathons, and networking events.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "AI",
+      "Machine Learning",
+      "Research"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Cyber Security Club",
+    "description": "Hands-on workshops on cybersecurity topics, hosting guest speakers, and competing in CTFs, CCDC, and CPTC competitions.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Cybersecurity",
+      "Hacking",
+      "Competition"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Developer Student Club (DSC)",
+    "description": "Google-sponsored organization teaching developer technologies used in the real world with project-based learning opportunities.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Programming",
+      "Google",
+      "Projects"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Girls Who Code",
+    "description": "Empowering inclusive team of next CS leaders breaking down barriers in tech due to resource inequality, race, and gender biases.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Women",
+      "Diversity",
+      "Programming"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "UVA Blockchain",
+    "description": "Exploring blockchain technology, cryptocurrency, and decentralized applications through projects, speakers, and discussions about Web3.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Blockchain",
+      "Cryptocurrency",
+      "Web3"
+    ],
+    "instagramHandle": "uva_blockchain",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Machine Learning Club (MLC)",
+    "description": "Organized review of online ML courses, topic presentations, industry speakers, and collaborative learning about machine learning.",
+    "category": "Academic",
+    "tags": [
+      "Technology",
+      "Machine Learning",
+      "AI",
+      "Academic"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Student Game Developers",
+    "description": "Game development club with game jams, long-term projects, workshops, game nights, and community events for aspiring game developers.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Game Development",
+      "Programming",
+      "Creative"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "UI/UX Design at UVA",
+    "description": "Fostering community of aspiring designers with workshops, speaker sessions, portfolio reviews focused on professional development.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Design",
+      "UI/UX",
+      "Professional"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Project Code",
+    "description": "Hands-on projects reflecting real-life CS applications, connecting passionate students with diverse skills for practical experience.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Projects",
+      "Programming",
+      "Collaboration"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Forge (formerly HackCville)",
+    "description": "Member-supported community of designers, programmers, makers, and creatives sharing, learning, and creating together.",
+    "category": "Technology",
+    "tags": [
+      "Technology",
+      "Startups",
+      "Makers",
+      "Community"
+    ],
+    "website": "https://joinforge.co",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Madison House",
+    "description": "UVA's student volunteer center connecting 2,000+ students with community service including tutoring, elderly care, environmental work.",
+    "category": "Service",
+    "tags": [
+      "Service",
+      "Volunteering",
+      "Community",
+      "Leadership"
+    ],
+    "website": "https://madisonhouse.org",
+    "email": "madisonhouse@virginia.edu",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Hoos Against Hunger",
+    "description": "Fighting food insecurity through food bank volunteering, donation drives, and raising awareness about hunger in Charlottesville.",
+    "category": "Service",
+    "tags": [
+      "Service",
+      "Food Security",
+      "Advocacy",
+      "Community"
+    ],
+    "instagramHandle": "hoos_against_hunger",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Habitat for Humanity",
+    "description": "Build homes and hope in Charlottesville. Weekly build days constructing affordable housing for local families.",
+    "category": "Service",
+    "tags": [
+      "Service",
+      "Construction",
+      "Housing",
+      "Community"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Alternative Spring Break (ASB)",
+    "description": "Week-long service trips focusing on environmental conservation, education, poverty, and disaster relief across the country.",
+    "category": "Service",
+    "tags": [
+      "Service",
+      "Travel",
+      "Immersion",
+      "Social Justice"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Entrepreneurship Club",
+    "description": "Supporting student entrepreneurs through mentorship, networking, pitch competitions, and connections to startup ecosystem.",
+    "category": "Business",
+    "tags": [
+      "Business",
+      "Entrepreneurship",
+      "Startups",
+      "Innovation"
+    ],
+    "website": "https://eclub.virginia.edu",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Madison Investment Group",
+    "description": "Student-managed investment fund focused on equity research and portfolio management with competitive application and intensive training.",
+    "category": "Business",
+    "tags": [
+      "Business",
+      "Finance",
+      "Investing",
+      "Research"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Investment Management Club (IMC)",
+    "description": "Managing student-run investment portfolio, stock pitch competitions, and learning about finance, investing, and markets.",
+    "category": "Business",
+    "tags": [
+      "Business",
+      "Finance",
+      "Investing",
+      "Markets"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Women in Business",
+    "description": "Empowering women in business through professional development, networking, mentorship, and connections with female executives.",
+    "category": "Business",
+    "tags": [
+      "Business",
+      "Women",
+      "Professional Development",
+      "Leadership"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "The Cavalier Daily",
+    "description": "UVA's independent student newspaper since 1890 covering news, sports, arts, and opinion with reporting, editing, and photography opportunities.",
+    "category": "Media",
+    "tags": [
+      "Journalism",
+      "Writing",
+      "News",
+      "Media"
+    ],
+    "website": "https://www.cavalierdaily.com",
+    "instagramHandle": "cavalierdaily",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "WUVA Radio",
+    "description": "Student-run radio station broadcasting music, talk shows, and UVA sports. Learn radio production, DJing, and broadcasting.",
+    "category": "Media",
+    "tags": [
+      "Radio",
+      "Music",
+      "Broadcasting",
+      "Media"
+    ],
+    "website": "https://www.wuvaradio.org",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "UVA Drama",
+    "description": "Student theater producing plays, musicals, and experimental performances with opportunities for acting, directing, stage crew, and design.",
+    "category": "Arts",
+    "tags": [
+      "Theater",
+      "Performance",
+      "Arts",
+      "Drama"
+    ],
+    "website": "https://drama.virginia.edu",
+    "instagramHandle": "uvadrama",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Hullabahoos",
+    "description": "UVA's premier all-male a cappella group known for energetic performances, tight harmonies, and entertaining shows.",
+    "category": "Arts",
+    "tags": [
+      "Music",
+      "A Cappella",
+      "Performance",
+      "Singing"
+    ],
+    "website": "https://hullabahoos.com",
+    "instagramHandle": "hullabahoos",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Virginia Belles",
+    "description": "All-female a cappella group performing pop, jazz, and contemporary music. One of UVA's oldest a cappella groups.",
+    "category": "Arts",
+    "tags": [
+      "Music",
+      "A Cappella",
+      "Performance",
+      "Singing"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Black Student Alliance (BSA)",
+    "description": "Promoting Black culture, advocacy, and community through social events, speakers, and activism. One of UVA's largest cultural organizations.",
+    "category": "Cultural",
+    "tags": [
+      "Culture",
+      "Black Community",
+      "Advocacy",
+      "Identity"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Latinx Student Alliance (LSA)",
+    "description": "Celebrating Latinx culture and supporting Latinx students through cultural events, mentorship, and advocacy.",
+    "category": "Cultural",
+    "tags": [
+      "Culture",
+      "Latinx",
+      "Community",
+      "Advocacy"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "South Asian Student Association (SASA)",
+    "description": "Celebrating South Asian culture through Holi, Garba, cultural shows, and community building. Open to all interested students.",
+    "category": "Cultural",
+    "tags": [
+      "Culture",
+      "South Asian",
+      "Community",
+      "Events"
+    ],
+    "instagramHandle": "uva_sasa",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Chinese Student Association (CSA)",
+    "description": "Promoting Chinese culture through Lunar New Year celebrations, cultural performances, and social events. Largest Asian cultural org.",
+    "category": "Cultural",
+    "tags": [
+      "Culture",
+      "Chinese",
+      "Community",
+      "Events"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Korean Student Association (KSA)",
+    "description": "Sharing Korean culture through K-pop dance workshops, Korean BBQ nights, and cultural festivals.",
+    "category": "Cultural",
+    "tags": [
+      "Culture",
+      "Korean",
+      "K-pop",
+      "Community"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Student Council",
+    "description": "UVA's student government representing student interests, allocating funding, and organizing events like Lighting of the Lawn.",
+    "category": "Governance",
+    "tags": [
+      "Leadership",
+      "Governance",
+      "Community",
+      "Advocacy"
+    ],
+    "website": "https://studentcouncil.virginia.edu",
+    "instagramHandle": "uvastudco",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Society of Women Engineers (SWE)",
+    "description": "Professional development, outreach, and community building for women in engineering through networking, workshops, and events.",
+    "category": "Engineering",
+    "tags": [
+      "Engineering",
+      "Women",
+      "Professional Development",
+      "STEM"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "National Society of Black Engineers (NSBE)",
+    "description": "Increasing culturally responsible Black engineers who excel academically, succeed professionally, and impact community positively.",
+    "category": "Engineering",
+    "tags": [
+      "Engineering",
+      "Black Community",
+      "Professional Development",
+      "STEM"
+    ],
+    "email": "nsbeatuva.president@gmail.com",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Society of Hispanic Professional Engineers (SHPE)",
+    "description": "Promoting engineering in Hispanic/Latino community through recruitment, retention, career development, and nationwide conference.",
+    "category": "Engineering",
+    "tags": [
+      "Engineering",
+      "Latinx",
+      "Professional Development",
+      "STEM"
+    ],
+    "email": "shpe.uva@gmail.com",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Society of Asian Scientists and Engineers (SASE)",
+    "description": "Preparing Asian heritage students for success, promoting diversity and tolerance, providing career potential opportunities.",
+    "category": "Engineering",
+    "tags": [
+      "Engineering",
+      "Asian",
+      "Professional Development",
+      "STEM"
+    ],
+    "email": "uva@saseconnect.org",
+    "isCIO": true,
+    "source": "manual"
+  },
+  {
+    "name": "Mechatronics and Robotics Society (MARS)",
+    "description": "Developing excavating robot for NASA Robotics Mining Competition with workshops on CAD, circuits, machining, and hands-on engineering.",
+    "category": "Engineering",
+    "tags": [
+      "Engineering",
+      "Robotics",
+      "Competition",
+      "Hands-on"
+    ],
+    "isCIO": true,
+    "source": "manual"
+  }
+]
