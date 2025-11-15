@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { BookOpen, Calendar, MessageSquare, Users, TrendingUp, CheckCircle } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
   return (
@@ -16,6 +17,8 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "Student";
   const currentCourses = [
     { code: "CS 2100", name: "Data Structures I", credits: 3, grade: "A" },
     { code: "MATH 1320", name: "Calculus II", credits: 4, grade: "B+" },
@@ -38,7 +41,7 @@ function DashboardContent() {
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-xl p-8 text-white">
-        <h1 className="text-4xl font-bold mb-2">Welcome back, Student!</h1>
+        <h1 className="text-4xl font-bold mb-2">Welcome back, {userName}!</h1>
         <p className="text-blue-100 text-lg">
           Your academic journey at UVA, simplified.
         </p>

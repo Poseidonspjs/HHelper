@@ -59,7 +59,7 @@ export default function Header() {
               {session ? (
                 <>
                   <span className="text-sm text-gray-700">
-                    {session.user?.email}
+                    {session.user?.name || session.user?.email}
                   </span>
                   <button
                     onClick={() => signOut()}

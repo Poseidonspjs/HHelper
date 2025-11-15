@@ -392,36 +392,20 @@ export default function Home() {
     setIsLoading(true);
     setSubmitMessage(null);
 
-    try {
-      const response = await fetch('/api/plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+    // Store form data in localStorage for later use after authentication
+    localStorage.setItem('pendingUserData', JSON.stringify(formData));
 
-      if (response.ok) {
-        await response.json();
-        setSubmitMessage({
-          type: 'success',
-          text: 'Your academic plan has been generated successfully! Redirecting to dashboard...'
-        });
-        // Redirect to dashboard after successful submission
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1500);
-      } else {
-        throw new Error('Failed to generate academic plan');
-      }
-    } catch {
-      setSubmitMessage({
-        type: 'error',
-        text: 'Sorry, there was an error generating your plan. The API endpoint is not yet implemented. Please try again later.'
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setSubmitMessage({
+      type: 'success',
+      text: 'Redirecting to dashboard...'
+    });
+
+    // Redirect to dashboard where they'll be prompted to log in
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1000);
+
+    setIsLoading(false);
   };
 
   return (

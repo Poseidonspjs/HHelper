@@ -12,6 +12,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -33,23 +34,53 @@ export default function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProp
       return;
     }
 
-    if (!isLogin && password !== confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
+    if (!isLogin) {
+      if (!name) {
+        setError("Please enter your name");
+        setIsLoading(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        setIsLoading(false);
+        return;
+      }
     }
 
     try {
       const result = await signIn("credentials", {
         email,
         password,
-        isSignUp: !isLogin,
+        name,
+        isSignUp: (!isLogin).toString(),
         redirect: false,
       });
 
       if (result?.error) {
-        setError("Invalid credentials. Please try again.");
+        setError(result.error === "CredentialsSignin"
+          ? "Invalid credentials. Please try again."
+          : result.error);
       } else if (result?.ok) {
+        // Check if there's pending user data from the landing page
+        const pendingData = localStorage.getItem('pendingUserData');
+        if (pendingData) {
+          try {
+            const formData = JSON.parse(pendingData);
+            // Save the pending user data to the database
+            await fetch('/api/user/update', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData)
+            });
+            // Clear the pending data
+            localStorage.removeItem('pendingUserData');
+          } catch (saveError) {
+            console.error('Error saving pending user data:', saveError);
+          }
+        }
+
         onClose();
         if (redirectTo) {
           router.push(redirectTo);
@@ -93,6 +124,23 @@ export default function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProp
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                placeholder="John Doe"
+                required={!isLogin}
+              />
+            </div>
+          )}
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -164,6 +212,7 @@ export default function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProp
             onClick={() => {
               setIsLogin(!isLogin);
               setError("");
+              setName("");
               setPassword("");
               setConfirmPassword("");
             }}

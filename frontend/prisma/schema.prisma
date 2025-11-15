@@ -11,18 +11,23 @@ datasource db {
 }
 
 model User {
-  id              String             @id @default(uuid())
-  email           String             @unique
-  name            String?
-  major           String?
-  graduationYear  Int?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  chatSessions    ChatSession[]
-  clubMemberships ClubMembership[]
-  enrollments     CourseEnrollment[]
-  plans           StudentPlan[]
-  profile         UserProfile?
+  id               String             @id @default(uuid())
+  email            String             @unique
+  name             String?
+  school           String?
+  major            String?
+  focusArea        String?
+  entryYear        Int?
+  apCredits        String[]
+  additionalDetails String?
+  graduationYear   Int?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  chatSessions     ChatSession[]
+  clubMemberships  ClubMembership[]
+  enrollments      CourseEnrollment[]
+  plans            StudentPlan[]
+  profile          UserProfile?
 
   @@map("users")
 }

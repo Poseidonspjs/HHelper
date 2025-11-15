@@ -6,22 +6,13 @@ export default withAuth(
     const token = req.nextauth.token;
     const isAuth = !!token;
     const isAuthPage = req.nextUrl.pathname === "/";
-    const isProtectedRoute = ["/dashboard", "/plan", "/chat", "/clubs"].some(
-      (route) => req.nextUrl.pathname.startsWith(route)
-    );
 
     // If user is authenticated and trying to access landing page, redirect to dashboard
     if (isAuthPage && isAuth) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // If user is not authenticated and trying to access protected routes, redirect to landing
-    if (isProtectedRoute && !isAuth) {
-      const redirectUrl = new URL("/", req.url);
-      redirectUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
-    }
-
+    // Allow all other routes (protected routes will handle auth check client-side)
     return NextResponse.next();
   },
   {
