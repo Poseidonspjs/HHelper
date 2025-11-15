@@ -7,6 +7,8 @@ import Link from "next/link";
 import { BookOpen, Calendar, MessageSquare, Users, TrendingUp, CheckCircle } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { calculateAPCredits, isFirstYear } from "@/lib/apCredits";
 
 export default function DashboardPage() {
   return (
@@ -19,6 +21,35 @@ export default function DashboardPage() {
 function DashboardContent() {
   const { data: session } = useSession();
   const userName = session?.user?.name || "Student";
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch user data from database
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/user/profile');
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data.user);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (session?.user?.email) {
+      fetchUserData();
+    }
+  }, [session]);
+
+  // Determine if user is a first year
+  const userIsFirstYear = userData ? isFirstYear(userData.entryYear) : true;
+
+  // Calculate credits from AP courses
+  const apCreditsTotal = userData?.apCredits ? calculateAPCredits(userData.apCredits) : 0;
   const currentCourses = [
     { code: "CS 2100", name: "Data Structures I", credits: 3, grade: "A" },
     { code: "MATH 1320", name: "Calculus II", credits: 4, grade: "B+" },
@@ -49,38 +80,62 @@ function DashboardContent() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* GPA Card - Only show for non-first years or if uploaded transcript */}
+        {(!userIsFirstYear || userData?.gpa) && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Current GPA</CardDescription>
+              <CardTitle className="text-3xl">{userData?.gpa?.toFixed(2) || "N/A"}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {userData?.gpa && (
+                <div className="flex items-center text-sm text-green-600">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  <span>Track your progress</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Credits Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Current GPA</CardDescription>
-            <CardTitle className="text-3xl">3.7</CardTitle>
+            <CardDescription>Credits {userIsFirstYear ? "From AP" : "Completed"}</CardDescription>
+            <CardTitle className="text-3xl">
+              {userIsFirstYear ? apCreditsTotal : (userData?.creditsCompleted || apCreditsTotal)}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center text-sm text-green-600">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              <span>+0.2 from last semester</span>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              {120 - (userIsFirstYear ? apCreditsTotal : (userData?.creditsCompleted || apCreditsTotal))} remaining
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Credits Completed</CardDescription>
-            <CardTitle className="text-3xl">42</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">78 remaining</p>
-          </CardContent>
-        </Card>
+        {userIsFirstYear && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>AP Courses</CardDescription>
+              <CardTitle className="text-3xl">{userData?.apCredits?.length || 0}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">courses transferred</p>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Current Load</CardDescription>
-            <CardTitle className="text-3xl">15</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">credits this semester</p>
-          </CardContent>
-        </Card>
+        {!userIsFirstYear && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Current Load</CardDescription>
+              <CardTitle className="text-3xl">15</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">credits this semester</p>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="pb-2">
