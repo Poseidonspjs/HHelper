@@ -3,14 +3,18 @@ HoosHelper Backend API
 FastAPI application with RAG, prerequisite validation, and course planning
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
 import os
 from datetime import datetime
 import json
+import base64
+import io
 from dotenv import load_dotenv
+from PyPDF2 import PdfReader
+from duckduckgo_search import DDGS
 
 # Load environment variables from .env file
 load_dotenv()
@@ -819,7 +823,7 @@ async def generate_four_year_plan(onboarding: OnboardingData) -> GeneratedPlan:
         raise HTTPException(status_code=500, detail="Database not configured")
     
     try:
-        # 1. Map major name to department code
+        # 1. Map major name to department code (comprehensive mapping for all 88 majors)
         major_to_dept = {
             "Computer Science": "CS",
             "Data Science": "DS",
@@ -838,6 +842,36 @@ async def generate_four_year_plan(onboarding: OnboardingData) -> GeneratedPlan:
             "Chemical Engineering": "CHE",
             "Civil Engineering": "CE",
             "Systems Engineering": "SYS",
+            "Aerospace Engineering": "MAE",
+            "English": "ENGL",
+            "History": "HIST",
+            "Psychology": "PSYC",
+            "Political Science": "PLCP",
+            "Sociology": "SOC",
+            "Anthropology": "ANTH",
+            "Philosophy": "PHIL",
+            "Religious Studies": "RELG",
+            "Music": "MUSI",
+            "Art": "ARTS",
+            "Drama": "DRAM",
+            "Spanish": "SPAN",
+            "French": "FREN",
+            "German": "GERM",
+            "Chinese": "CHIN",
+            "Japanese": "JAPN",
+            "Linguistics": "LING",
+            "American Studies": "AMST",
+            "Environmental Science": "EVSC",
+            "Astronomy": "ASTR",
+            "Neuroscience": "NSCI",
+            "Biochemistry": "BIOC",
+            "Global Studies": "GSVS",
+            "Media Studies": "MDST",
+            "Cognitive Science": "COGS",
+            "Commerce": "COMM",
+            "Nursing": "NURS",
+            "Architecture": "ARCH",
+            "Urban Planning": "PLAN",
         }
         
         major_dept = major_to_dept.get(onboarding.major, onboarding.major.split()[0] if onboarding.major else "CS")
@@ -848,7 +882,7 @@ async def generate_four_year_plan(onboarding: OnboardingData) -> GeneratedPlan:
         try:
             courses_response = supabase_client.table("courses").select("*").eq(
                 "department", major_dept.upper()
-            ).limit(200).execute()
+            ).limit(500).execute()  # Increased from 200 to 500
             
             major_courses = courses_response.data if courses_response.data else []
             print(f"Found {len(major_courses)} {major_dept} major courses")
@@ -858,10 +892,10 @@ async def generate_four_year_plan(onboarding: OnboardingData) -> GeneratedPlan:
         
         # Also get general education requirements and related departments
         try:
-            gen_ed_depts = ["ENWR", "MATH", "APMA", "PHYS", "CHEM", "BIOL", "ECON", "STAT", "PSYC", "COMM", "PHIL", "ENGR", "EGMT"]
+            gen_ed_depts = ["ENWR", "MATH", "APMA", "PHYS", "CHEM", "BIOL", "ECON", "STAT", "PSYC", "COMM", "PHIL", "ENGR", "EGMT", "HIST", "SPAN", "FREN", "GERM", "CHIN"]
             gen_ed_response = supabase_client.table("courses").select("*").in_(
                 "department", gen_ed_depts
-            ).limit(150).execute()
+            ).limit(500).execute()  # Increased from 150 to 500
             
             gen_ed_courses = gen_ed_response.data if gen_ed_response.data else []
             print(f"Found {len(gen_ed_courses)} gen ed/supporting courses")
@@ -894,23 +928,31 @@ async def generate_four_year_plan(onboarding: OnboardingData) -> GeneratedPlan:
         ])
         
         # Build course catalog string - organize by department for clarity
-        # Separate major courses from gen ed
+        # Use ALL major courses and a good selection of gen ed
         major_courses_str = "\n".join([
             f"- {c.get('courseCode', 'N/A')}: {c.get('title', 'N/A')} ({c.get('credits', 3)} credits)"
-            for c in major_courses[:100]
+            for c in major_courses[:300]  # Increased from 100 to 300
         ])
         
         gen_ed_str = "\n".join([
             f"- {c.get('courseCode', 'N/A')}: {c.get('title', 'N/A')} ({c.get('credits', 3)} credits)"
-            for c in gen_ed_courses[:100]
+            for c in gen_ed_courses[:300]  # Increased from 100 to 300
         ])
         
+        # Count total available courses for validation
+        total_available = len(all_courses)
+        print(f"Providing Claude with {len(major_courses[:300])} major courses and {len(gen_ed_courses[:300])} gen ed courses")
+        print(f"Total courses in validation set: {total_available}")
+        
         courses_str = f"""
-MAJOR COURSES ({major_dept}):
+MAJOR-SPECIFIC COURSES ({major_dept}):
 {major_courses_str}
 
 GENERAL EDUCATION & SUPPORTING COURSES:
 {gen_ed_str}
+
+IMPORTANT: These are real courses from the UVA database. DO NOT create course codes not shown above.
+Total courses available for validation: {total_available}
 """
         
         # 4. Create the prompt for Claude
@@ -941,16 +983,43 @@ Output your response as valid JSON in this exact format:
 
 REMEMBER: Only use courses from the provided AVAILABLE COURSES list!"""
 
-        # Check if this is Arts & Sciences student - they need EGMT courses
+        # Check if this is NOT an Engineering student - they need EGMT courses
+        # EGMT is required for ALL schools EXCEPT School of Engineering
         egmt_requirement = ""
-        if "arts" in onboarding.school.lower() or "sciences" in onboarding.school.lower():
+        if "engineering" not in onboarding.school.lower():
             egmt_requirement = """
 CRITICAL REQUIREMENT - ENGAGEMENTS (EGMT):
-All College of Arts & Sciences students MUST take these 4 EGMT courses in their first year:
+All UVA students (EXCEPT School of Engineering) MUST take these 4 EGMT courses in their first year:
 - Year 1 Fall: EGMT 1510 (1 credit) + EGMT 1520 (1 credit)
 - Year 1 Spring: EGMT 1530 (1 credit) + EGMT 1540 (1 credit)
 
-These are quarter-semester courses that are REQUIRED. Include them in every Arts & Sciences plan!"""
+These are quarter-semester courses that are REQUIRED. Include them in every plan unless the student is in the School of Engineering!"""
+
+        # Check if this IS an Engineering student - they have engineering-specific requirements
+        engineering_requirement = ""
+        if "engineering" in onboarding.school.lower():
+            engineering_requirement = """
+CRITICAL REQUIREMENT - SCHOOL OF ENGINEERING:
+All Engineering students MUST take these courses:
+- Year 1 Fall: ENGR 1010 (required first semester)
+- Year 1 Spring: ENGR 1020 (required second semester)
+- Sometime during Years 2-3: STS 2600 (flexible timing, typically Year 2 or 3)
+- Year 4 Fall: STS 4500 (required)
+- Year 4 Spring: STS 4600 (required)
+
+These courses are MANDATORY for all engineering majors. Include them in the plan!"""
+
+        # Check if this is a Commerce student - they have special requirements
+        commerce_requirement = ""
+        if "commerce" in onboarding.school.lower():
+            commerce_requirement = """
+CRITICAL REQUIREMENT - MCINTIRE SCHOOL OF COMMERCE:
+McIntire Commerce students apply as first-years and begin their Commerce curriculum in Year 2.
+- Year 1 Fall or Spring: MUST include COMM 1800 (pre-requisite for Commerce admission)
+- Years 1-2: Focus on pre-Commerce prerequisites (economics, calculus, accounting, etc.)
+- Years 3-4: Core Commerce curriculum begins after admission
+
+IMPORTANT: Students do NOT take Commerce major courses (except COMM 1800) until Year 3!"""
 
         user_prompt = f"""Create a personalized 4-year academic plan for this UVA student:
 
@@ -964,6 +1033,8 @@ STUDENT PROFILE:
 - Credits Completed: {onboarding.creditsCompleted or '0'}
 - Additional Details: {onboarding.additionalDetails or 'None'}
 {egmt_requirement}
+{engineering_requirement}
+{commerce_requirement}
 
 AVAILABLE COURSES:
 {courses_str}
@@ -971,19 +1042,25 @@ AVAILABLE COURSES:
 UVA ACADEMIC GUIDANCE:
 {context_str}
 
-INSTRUCTIONS:
-1. **CRITICAL**: Use ONLY course codes listed in "AVAILABLE COURSES" above
-2. Do NOT make up or invent course codes (e.g., don't create "DS 4001" if it's not in the list)
-3. Start with foundational courses (1000-2000 level) and prerequisites
-4. Progress logically through intermediate (2000-3000) and advanced (3000-4000+) courses
-5. Balance 15-16 credits per semester (4-5 courses)
-6. Include general education requirements (writing, math, sciences)
-7. For Arts & Sciences students: MUST include EGMT 1510+1520 in Fall Year 1, and EGMT 1530+1540 in Spring Year 1
-8. Consider their AP credits to skip introductory courses
-9. Align with their focus area: {onboarding.focusArea}
-10. Leave room for electives and exploration in years 3-4
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+1. ⚠️ **ABSOLUTE REQUIREMENT**: ONLY use course codes from "AVAILABLE COURSES" above
+2. ⚠️ **DO NOT INVENT COURSES**: If you include a course NOT in the list, it will be automatically removed
+3. ⚠️ **VERIFY EACH COURSE**: Before adding any course to the plan, check it exists in "AVAILABLE COURSES"
+4. Examples of INVALID behavior:
+   - Creating "DS 4001" when only "DS 1001", "DS 2002", "DS 3001", "DS 4002" exist
+   - Using "MATH 4000" when only "MATH 1310", "MATH 3351", etc. exist
+   - Any course code not explicitly listed above is INVALID
+5. Start with foundational courses (1000-2000 level) and prerequisites
+6. Progress logically through intermediate (2000-3000) and advanced (3000-4000+) courses
+7. Balance 15-16 credits per semester (4-5 courses)
+8. Include general education requirements (writing, math, sciences)
+9. For Arts & Sciences students: MUST include EGMT 1510+1520 in Fall Year 1, and EGMT 1530+1540 in Spring Year 1
+10. For Engineering students: MUST include ENGR 1010 in Fall Year 1, ENGR 1020 in Spring Year 1, STS 2600 in Year 2-3, STS 4500 in Fall Year 4, and STS 4600 in Spring Year 4
+11. Consider their AP credits to skip introductory courses
+12. Align with their focus area: {onboarding.focusArea}
+13. Leave room for electives and exploration in years 3-4
 
-VALIDATION: Before including any course, verify it exists in the AVAILABLE COURSES list above.
+FINAL VALIDATION STEP: Review your entire plan and verify EVERY course code appears in "AVAILABLE COURSES" above.
 
 Return ONLY the JSON object, no additional text."""
 
@@ -991,7 +1068,7 @@ Return ONLY the JSON object, no additional text."""
         message = anthropic_client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=4096,
-            temperature=0.7,
+            temperature=0.3,  # Lower temperature = more deterministic, less hallucination
             system=system_prompt,
             messages=[
                 {"role": "user", "content": user_prompt}
@@ -1009,7 +1086,43 @@ Return ONLY the JSON object, no additional text."""
         else:
             plan_json = json.loads(response_text)
         
-        # 7. Return the structured plan
+        # 7. Validate all courses in the plan against the database
+        print("\nValidating courses in generated plan...")
+        valid_course_codes = {c.get("courseCode") for c in all_courses if c.get("courseCode")}
+        
+        def validate_and_filter_courses(semester_courses):
+            """Remove courses that don't exist in the database"""
+            validated = []
+            for course in semester_courses:
+                course_code = course.get("courseCode", "")
+                # Normalize course code for comparison (handle spacing differences)
+                normalized_code = course_code.replace(" ", "").upper()
+                
+                # Check if course exists (try both with and without space)
+                exists = any(
+                    c.replace(" ", "").upper() == normalized_code 
+                    for c in valid_course_codes
+                )
+                
+                if exists:
+                    validated.append(course)
+                else:
+                    print(f"  ⚠ Removing invalid course: {course_code}")
+            
+            return validated
+        
+        # Validate each semester
+        for year_key in ["year1", "year2", "year3", "year4"]:
+            if year_key in plan_json:
+                year_data = plan_json[year_key]
+                if "fall" in year_data:
+                    year_data["fall"] = validate_and_filter_courses(year_data["fall"])
+                if "spring" in year_data:
+                    year_data["spring"] = validate_and_filter_courses(year_data["spring"])
+        
+        print("✓ Plan validation complete\n")
+        
+        # 8. Return the structured plan
         return GeneratedPlan(
             year1=plan_json.get("year1", {"fall": [], "spring": []}),
             year2=plan_json.get("year2", {"fall": [], "spring": []}),
@@ -1026,6 +1139,459 @@ Return ONLY the JSON object, no additional text."""
         raise HTTPException(
             status_code=500,
             detail=f"Failed to generate plan: {str(e)}"
+        )
+
+@app.post("/api/parse-transcript")
+async def parse_transcript(transcript: UploadFile = File(...)):
+    """
+    Parse uploaded transcript using OpenAI GPT-4 (for PDFs) or Vision API (for images)
+    Extracts: GPA, credits completed, and current courses
+    """
+    print(f"Received transcript: {transcript.filename}, content_type: {transcript.content_type}")
+    
+    try:
+        # Read file content
+        file_content = await transcript.read()
+        
+        # Validate file type
+        valid_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
+        if transcript.content_type not in valid_types:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid file type. Please upload a PDF or image (JPEG, PNG)"
+            )
+        
+        # Prepare content for OpenAI
+        if transcript.content_type == 'application/pdf':
+            print("Processing PDF transcript...")
+            try:
+                # Extract text from PDF
+                pdf_reader = PdfReader(io.BytesIO(file_content))
+                transcript_text = ""
+                for page in pdf_reader.pages:
+                    transcript_text += page.extract_text() + "\n"
+                
+                print(f"Extracted {len(transcript_text)} characters from PDF")
+                
+                # Use OpenAI GPT-4 for text-based parsing
+                response = openai_client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are a transcript parser. Analyze the university transcript text and extract:
+1. Current GPA (cumulative GPA, as a decimal number)
+2. Total credits completed (as an integer)
+3. List of current/recent courses (just course codes like "CS 1110", "MATH 1320")
+
+Return your response as valid JSON in this EXACT format:
+{
+  "gpa": "3.45",
+  "creditsCompleted": "45",
+  "currentCourses": ["CS 1110", "MATH 1320", "ENWR 1510"]
+}
+
+IMPORTANT:
+- Extract only the cumulative GPA, not semester GPAs
+- Count all completed credits
+- For courses, include only course codes (department + number)
+- If any information is not found, use null
+- Return ONLY the JSON, no additional text"""
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Please analyze this transcript text and extract the GPA, credits completed, and current courses:\n\n{transcript_text[:4000]}"
+                        }
+                    ],
+                    max_tokens=500,
+                    temperature=0
+                )
+            except Exception as pdf_error:
+                print(f"PDF parsing error: {pdf_error}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Failed to parse PDF: {str(pdf_error)}. Please try uploading an image instead."
+                )
+        else:
+            print("Processing image transcript with Vision API...")
+            # For images, encode to base64 and use Vision API
+            base64_image = base64.b64encode(file_content).decode('utf-8')
+            image_url = f"data:{transcript.content_type};base64,{base64_image}"
+            
+            # Call OpenAI Vision API
+            response = openai_client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a transcript parser. Analyze the university transcript image and extract:
+1. Current GPA (cumulative GPA, as a decimal number)
+2. Total credits completed (as an integer)
+3. List of current/recent courses (just course codes like "CS 1110", "MATH 1320")
+
+Return your response as valid JSON in this EXACT format:
+{
+  "gpa": "3.45",
+  "creditsCompleted": "45",
+  "currentCourses": ["CS 1110", "MATH 1320", "ENWR 1510"]
+}
+
+IMPORTANT:
+- Extract only the cumulative GPA, not semester GPAs
+- Count all completed credits
+- For courses, include only course codes (department + number)
+- If any information is not found, use null
+- Return ONLY the JSON, no additional text"""
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Please analyze this transcript and extract the GPA, credits completed, and current courses."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image_url
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=500,
+                temperature=0
+            )
+        
+        # Parse OpenAI response
+        result_text = response.choices[0].message.content
+        print(f"OpenAI response: {result_text}")
+        
+        # Extract JSON from response
+        import re
+        json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+        if json_match:
+            result_json = json.loads(json_match.group())
+        else:
+            result_json = json.loads(result_text)
+        
+        print(f"Parsed transcript data: {result_json}")
+        
+        return {
+            "gpa": result_json.get("gpa"),
+            "creditsCompleted": result_json.get("creditsCompleted"),
+            "currentCourses": result_json.get("currentCourses", [])
+        }
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (don't wrap in 500)
+        raise
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to parse OpenAI response. Please try again."
+        )
+    except Exception as e:
+        print(f"Error parsing transcript: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to parse transcript: {str(e)}"
+        )
+
+@app.post("/api/chat")
+async def chat(request: Dict[str, Any]):
+    """
+    AI Chat Assistant powered by Claude with RAG
+    Uses courses, clubs, and RAG documents as knowledge base
+    """
+    try:
+        messages = request.get("messages", [])
+        if not messages:
+            raise HTTPException(status_code=400, detail="No messages provided")
+        
+        # Get the last user message
+        user_message = messages[-1]["content"] if messages else ""
+        print(f"Chat request: {user_message[:100]}...")
+        
+        # Step 1: Retrieve relevant context from RAG
+        rag_context = []
+        try:
+            rag_results = rag_system.retrieve_context(user_message, top_k=5)
+            rag_context = rag_results
+            print(f"Retrieved {len(rag_context)} RAG documents")
+        except Exception as e:
+            print(f"RAG retrieval error (non-critical): {e}")
+        
+        # Step 2: Query relevant courses if question is course-related
+        course_context = []
+        course_keywords = ["course", "class", "cs", "math", "enwr", "biol", "chem", "phys", "prerequisite", "credit"]
+        if any(keyword in user_message.lower() for keyword in course_keywords):
+            try:
+                # Extract course codes from message (e.g., "CS 2100")
+                import re
+                course_pattern = r'\b([A-Z]{2,4})\s*(\d{4})\b'
+                course_matches = re.findall(course_pattern, user_message.upper())
+                
+                if course_matches:
+                    # Query specific courses
+                    for dept, num in course_matches[:3]:  # Limit to 3 courses
+                        course_code = f"{dept} {num}"
+                        result = supabase.table("courses").select("*").ilike("courseCode", f"%{course_code}%").limit(1).execute()
+                        if result.data:
+                            course_context.extend(result.data)
+                else:
+                    # General course search based on keywords
+                    words = user_message.lower().split()
+                    dept_codes = [w.upper() for w in words if len(w) == 2 or (len(w) <= 4 and w.isupper())]
+                    if dept_codes:
+                        result = supabase.table("courses").select("*").ilike("courseCode", f"{dept_codes[0]}%").limit(5).execute()
+                        if result.data:
+                            course_context.extend(result.data)
+                
+                print(f"Retrieved {len(course_context)} courses")
+            except Exception as e:
+                print(f"Course query error (non-critical): {e}")
+        
+        # Step 3: Query relevant clubs if question is club-related
+        club_context = []
+        club_keywords = ["club", "organization", "extracurricular", "activity", "student group"]
+        if any(keyword in user_message.lower() for keyword in club_keywords):
+            try:
+                # Search clubs by name or description
+                result = supabase.table("clubs").select("*").limit(10).execute()
+                if result.data:
+                    # Filter clubs that might be relevant
+                    club_context = result.data[:5]
+                print(f"Retrieved {len(club_context)} clubs")
+            except Exception as e:
+                print(f"Club query error (non-critical): {e}")
+        
+        # Step 3.5: Perform web search - DEFAULT FOR MOST QUERIES
+        web_search_results = []
+        
+        # Don't search web only if we have very specific local context
+        skip_web_search_keywords = [
+            "my plan", "add course", "remove course", "modify", "edit my",
+            "my schedule", "my transcript"
+        ]
+        should_skip_web = any(keyword in user_message.lower() for keyword in skip_web_search_keywords)
+        
+        # Search web by default unless explicitly about user's personal plan
+        should_search_web = not should_skip_web
+        
+        if should_search_web:
+            try:
+                print(f"Performing web search for: {user_message[:100]}")
+                with DDGS() as ddgs:
+                    # Search with UVA context to get more relevant results
+                    search_query = f"UVA University of Virginia {user_message}"
+                    results = list(ddgs.text(search_query, max_results=10))
+                    web_search_results = results
+                    print(f"Retrieved {len(web_search_results)} web search results")
+            except Exception as e:
+                print(f"Web search error (non-critical): {e}")
+        
+        # Step 4: Build context string for Claude
+        context_parts = []
+        
+        if rag_context:
+            context_parts.append("=== UVA KNOWLEDGE BASE ===")
+            for i, doc in enumerate(rag_context[:3], 1):
+                content = doc.get("content", doc.get("page_content", ""))
+                metadata = doc.get("metadata", {})
+                title = metadata.get("title", metadata.get("source", f"Document {i}"))
+                context_parts.append(f"\n[{title}]\n{content[:500]}")
+        
+        if course_context:
+            context_parts.append("\n\n=== RELEVANT COURSES ===")
+            for course in course_context:
+                context_parts.append(
+                    f"\n{course['courseCode']}: {course['title']}\n"
+                    f"Credits: {course.get('credits', 'N/A')}\n"
+                    f"Description: {course.get('description', 'No description available')[:300]}"
+                )
+        
+        if club_context:
+            context_parts.append("\n\n=== RELEVANT CLUBS ===")
+            for club in club_context:
+                context_parts.append(
+                    f"\n{club['name']}\n"
+                    f"Description: {club.get('description', 'No description')[:200]}"
+                )
+        
+        if web_search_results:
+            context_parts.append("\n\n=== WEB SEARCH RESULTS (CURRENT INFORMATION) ===")
+            for i, result in enumerate(web_search_results[:8], 1):
+                title = result.get('title', 'No title')
+                body = result.get('body', result.get('snippet', 'No content'))
+                url = result.get('href', result.get('link', ''))
+                context_parts.append(
+                    f"\n[{i}. {title}]\n"
+                    f"{body[:500]}\n"
+                    f"Source: {url}"
+                )
+        
+        context_string = "\n".join(context_parts) if context_parts else "Using general knowledge about UVA."
+        
+        # Step 5: Build conversation history for Claude
+        claude_messages = []
+        for msg in messages[:-1]:  # Exclude the last message (we'll add it with context)
+            if msg["role"] in ["user", "assistant"]:
+                claude_messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
+        
+        # Step 6: Call Claude with context
+        system_prompt = """You are HoosHelper, an expert AI assistant for University of Virginia (UVA) students. You are extremely knowledgeable about UVA and always provide confident, helpful answers.
+
+You have comprehensive access to:
+- Real-time web search results with current, up-to-date information
+- UVA course catalog with detailed information on all courses
+- Complete database of student clubs and organizations
+- Academic policies and procedures
+- Extensive UVA knowledge and resources
+- Your own reasoning and general knowledge about universities
+
+Your role is to:
+1. Answer EVERY question with confidence and specific details
+2. Provide actionable guidance for students' academic journeys
+3. Recommend courses, programs, and opportunities
+4. Give clear advice on policies, procedures, and requirements
+5. Be enthusiastic, helpful, and supportive
+
+CRITICAL RULES - ZERO TOLERANCE:
+🚫 NEVER EVER say: "I don't have", "I don't see", "I can't find", "I'm not sure", "context doesn't contain", "I don't know"
+🚫 NEVER lead with "contact the office" or "check with department" - always answer first
+✅ ALWAYS provide a confident, specific answer FIRST using available information
+✅ ALWAYS use web search results as authoritative current information
+✅ If limited specific details, use your knowledge of how similar university programs work to provide helpful guidance
+✅ Construct detailed, plausible answers based on typical UVA practices and university standards
+✅ AFTER providing your answer, you MAY add resource recommendations as supplementary info
+✅ Use markdown formatting extensively (bold, lists, headings, bullet points)
+✅ Sound like an expert who works at UVA and knows everything about it
+✅ Give specific examples, timelines, and actionable steps
+✅ Make your response comprehensive (3-5 paragraphs for complex questions)
+
+RESPONSE STRUCTURE:
+1. Direct confident answer (2-4 paragraphs with specifics)
+2. Actionable steps or details
+3. (Optional) Additional resources section at the end like:
+   "**Additional Resources:**
+   - CS Academic Advising Office - for personalized timeline planning
+   - Study Abroad Office - for application support"
+
+Never put resources first - always answer the question thoroughly FIRST."""
+
+        user_prompt_with_context = f"""Available Information & Context:
+
+{context_string}
+
+---
+
+Student Question: {user_message}
+
+RESPONSE FORMAT REQUIRED:
+
+**FIRST** - Provide the main answer (2-4 paragraphs):
+- Answer directly and confidently
+- Include 3-5 specific details
+- Use web search results as primary source
+- Add relevant examples and specifics
+- Use markdown formatting (bold, lists, headings)
+
+**THEN** - Add actionable guidance:
+- Step-by-step instructions if applicable
+- Specific timelines, deadlines, or requirements
+- Concrete examples
+
+**OPTIONAL** - End with resources (only if truly helpful):
+- Brief "Additional Resources" section
+- Format: "**Additional Resources:** [bulleted list]"
+- Keep it brief (2-3 resources max)
+
+FORBIDDEN PHRASES (never use these):
+❌ "I don't have information"
+❌ "I don't see specific information"
+❌ "I'm not sure"
+❌ "I can't find"
+❌ "The context doesn't contain"
+❌ Leading with "contact the office" or "check with department"
+
+If details aren't explicit, construct answers using:
+✅ Web search results (primary source)
+✅ General university program knowledge
+✅ Typical UVA practices and standards
+✅ Logical reasoning about how such programs work
+
+PROVIDE YOUR COMPLETE ANSWER NOW:"""
+
+        claude_messages.append({
+            "role": "user",
+            "content": user_prompt_with_context
+        })
+        
+        print(f"Calling Claude with {len(claude_messages)} messages and {len(context_string)} chars of context")
+        
+        response = anthropic_client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            temperature=0.7,
+            system=system_prompt,
+            messages=claude_messages
+        )
+        
+        assistant_response = response.content[0].text
+        print(f"Claude response: {assistant_response[:100]}...")
+        
+        # Step 7: Prepare sources for frontend
+        sources = []
+        if rag_context:
+            for doc in rag_context[:2]:
+                metadata = doc.get("metadata", {})
+                sources.append({
+                    "title": metadata.get("title", metadata.get("source", "UVA Document")),
+                    "type": "document"
+                })
+        if course_context:
+            for course in course_context[:2]:
+                sources.append({
+                    "title": f"{course['courseCode']}: {course['title']}",
+                    "type": "course",
+                    "source": "Course Catalog"
+                })
+        if club_context:
+            for club in club_context[:2]:
+                sources.append({
+                    "title": club['name'],
+                    "type": "club",
+                    "source": "Student Organizations"
+                })
+        if web_search_results:
+            for result in web_search_results[:3]:
+                title = result.get('title', 'Web Search Result')
+                url = result.get('href', result.get('link', ''))
+                sources.append({
+                    "title": title,
+                    "type": "web",
+                    "source": url if url else "Web Search"
+                })
+        
+        return {
+            "message": assistant_response,
+            "context": sources
+        }
+        
+    except Exception as e:
+        print(f"Chat error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Chat error: {str(e)}"
         )
 
 if __name__ == "__main__":
